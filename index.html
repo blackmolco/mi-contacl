@@ -439,6 +439,63 @@
   .liq-print-wrap { display: none; }
   @media print { body > * { display: none !important; } .liq-print-wrap { display: block !important; } }
 
+  /* ===== MULTI-EMPRESA ===== */
+  #pantalla-empresas {
+    position: fixed; inset: 0; background: var(--bg); z-index: 1000;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .emp-selector-box {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 16px;
+    padding: 2.5rem; width: 520px; max-width: 96vw; max-height: 90vh; overflow-y: auto;
+  }
+  .emp-selector-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.5rem; color: var(--text); margin-bottom: 0.25rem; }
+  .emp-selector-sub { font-size: 0.85rem; color: var(--text3); margin-bottom: 1.5rem; }
+  .emp-card {
+    background: var(--bg3); border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px 16px; margin-bottom: 8px; cursor: pointer;
+    display: flex; justify-content: space-between; align-items: center;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .emp-card:hover { border-color: var(--accent); background: var(--bg2); }
+  .emp-card.activa { border-color: var(--accent); background: rgba(240,136,62,0.06); }
+  .emp-card-nombre { font-weight: 700; font-size: 0.9rem; color: var(--text); }
+  .emp-card-rut { font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--accent); }
+  .emp-card-acciones { display: flex; gap: 4px; }
+
+  .empresa-header-bar {
+    background: var(--bg2); border-bottom: 1px solid var(--border);
+    padding: 6px 20px; display: flex; align-items: center; gap: 12px;
+    font-size: 0.8rem; color: var(--text2);
+  }
+  .empresa-header-bar .emp-nombre-activa { font-weight: 700; color: var(--accent); font-family: 'Syne', sans-serif; }
+  .empresa-header-bar select {
+    background: var(--bg3); border: 1px solid var(--border); border-radius: 6px;
+    color: var(--text); padding: 3px 8px; font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem; cursor: pointer;
+  }
+
+  /* ===== INVENTARIO ===== */
+  .inv-stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px,1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+  .inv-stat-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; }
+  .inv-stat-label { font-size: 0.72rem; color: var(--text3); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
+  .inv-stat-val { font-family: 'DM Mono', monospace; font-size: 1.1rem; font-weight: 700; color: var(--text); margin-top: 4px; }
+  .prod-table-wrap { overflow-x: auto; }
+  .badge-entrada { background: rgba(63,185,80,0.15); color: var(--green); border: 1px solid rgba(63,185,80,0.3); }
+  .badge-salida { background: rgba(248,81,73,0.12); color: var(--red); border: 1px solid rgba(248,81,73,0.25); }
+  .badge-ajuste { background: rgba(210,153,34,0.15); color: var(--yellow); border: 1px solid rgba(210,153,34,0.3); }
+
+  /* ===== AUXILIARES ===== */
+  .aux-tipo-badge-cliente { background:rgba(31,139,236,0.12); color:#4dabf7; border:1px solid rgba(31,139,236,0.25); }
+  .aux-tipo-badge-proveedor { background:rgba(240,136,62,0.12); color:var(--accent); border:1px solid rgba(240,136,62,0.3); }
+  .aux-saldo-positivo { color: var(--green); }
+  .aux-saldo-negativo { color: var(--red); }
+  .antig-bar { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:6px; margin-bottom:1.5rem; }
+  .antig-card { background:var(--bg2); border:1px solid var(--border); border-radius:9px; padding:12px 14px; }
+  .antig-card-label { font-size:0.72rem; color:var(--text3); text-transform:uppercase; font-weight:600; letter-spacing:0.5px; }
+  .antig-card-val { font-family:'DM Mono',monospace; font-size:1.05rem; font-weight:700; margin-top:4px; }
+  .antig-card-count { font-size:0.75rem; color:var(--text3); margin-top:2px; }
+  .linea-aux-selector { font-size:0.78rem; padding:4px 8px; background:var(--bg3); border:1px solid var(--border); border-radius:5px; color:var(--text); font-family:'DM Sans',sans-serif; min-width:0; }
+
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
@@ -447,10 +504,31 @@
 </head>
 <body>
 
+<!-- PANTALLA SELECTOR DE EMPRESAS -->
+<div id="pantalla-empresas" style="display:none;">
+  <div class="emp-selector-box">
+    <div class="emp-selector-title">ContaCL</div>
+    <div class="emp-selector-sub">Sistema Contable · Selecciona o crea una empresa para continuar</div>
+    <div id="lista-empresas"></div>
+    <div id="form-nueva-empresa" style="display:none;margin-top:1rem;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:1rem;">
+      <div style="font-weight:700;font-size:0.85rem;margin-bottom:10px;color:var(--accent);">Nueva Empresa</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div class="form-group full"><label>Nombre / Razón Social *</label><input type="text" id="ne-nombre" placeholder="Ej: Comercial Los Andes SpA"></div>
+        <div class="form-group"><label>RUT</label><input type="text" id="ne-rut" placeholder="76.123.456-7" oninput="formatRut(this)"></div>
+        <div class="form-group"><label>Giro</label><input type="text" id="ne-giro" placeholder="Comercio al por menor"></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px;justify-content:flex-end;">
+        <button class="btn" onclick="document.getElementById('form-nueva-empresa').style.display='none'">Cancelar</button>
+        <button class="btn btn-green" onclick="crearEmpresa()">✓ Crear Empresa</button>
+      </div>
+    </div>
+    <button class="btn btn-accent" onclick="document.getElementById('form-nueva-empresa').style.display='';document.getElementById('ne-nombre').focus()" style="width:100%;margin-top:1rem;" id="btn-nueva-emp">+ Nueva Empresa</button>
+  </div>
+</div>
+
 <header>
   <div class="logo">ContaCL <span>Sistema Contable · Norma Chilena</span></div>
   <div class="header-actions">
-    <!-- Selector de tema -->
     <div class="theme-switcher" title="Cambiar tema">
       <button class="theme-btn active" id="tbtn-oscuro" onclick="setTema('oscuro')" title="Tema Oscuro"><span>🌙</span></button>
       <button class="theme-btn" id="tbtn-claro" onclick="setTema('claro')" title="Tema Claro"><span>☀️</span></button>
@@ -462,8 +540,17 @@
     <button class="btn btn-accent" onclick="abrirModalAsiento()">+ Nuevo Asiento</button>
   </div>
 </header>
+<!-- BARRA EMPRESA ACTIVA -->
+<div class="empresa-header-bar" id="empresa-header-bar">
+  <span>🏢</span>
+  <span class="emp-nombre-activa" id="emp-nombre-activa">—</span>
+  <span style="color:var(--text3);font-family:'DM Mono',monospace;font-size:0.75rem;" id="emp-rut-activa"></span>
+  <span style="flex:1"></span>
+  <select id="sel-empresa-rapido" onchange="cambiarEmpresaRapido(this.value)" title="Cambiar empresa"></select>
+  <button class="btn" style="padding:3px 10px;font-size:0.75rem;" onclick="mostrarSelectorEmpresas()">⚙ Gestionar</button>
+</div>
 
-<div class="app">
+<div class="app" id="app-main" style="display:none;">
   <nav>
     <div class="nav-section">General</div>
     <div class="nav-item active" data-page="dashboard"><span class="nav-icon">🏠</span> Dashboard</div>
@@ -483,6 +570,14 @@
     <div class="nav-item" data-page="rem-liquidaciones"><span class="nav-icon">💰</span> Liquidaciones</div>
     <div class="nav-item" data-page="rem-libro"><span class="nav-icon">📑</span> Libro Rem.</div>
     <div class="nav-item" data-page="rem-params"><span class="nav-icon">⚙️</span> Parámetros</div>
+    <div class="nav-section">Auxiliares</div>
+    <div class="nav-item" data-page="aux-registro"><span class="nav-icon">🏷️</span> Clientes / Proveed.</div>
+    <div class="nav-item" data-page="aux-mayor"><span class="nav-icon">📋</span> Mayor Auxiliar</div>
+    <div class="nav-item" data-page="aux-antiguedad"><span class="nav-icon">⏱️</span> Antigüedad Saldos</div>
+    <div class="nav-section">Inventario</div>
+    <div class="nav-item" data-page="inv-productos"><span class="nav-icon">📦</span> Productos</div>
+    <div class="nav-item" data-page="inv-movimientos"><span class="nav-icon">🔄</span> Movimientos</div>
+    <div class="nav-item" data-page="inv-resumen"><span class="nav-icon">📊</span> Resumen / Cierre</div>
   </nav>
 
   <main>
@@ -651,6 +746,9 @@
       <div class="filters" style="flex-wrap:wrap;gap:8px;">
         <select class="filter-input" id="filtro-cuenta-mayor" onchange="renderMayor()">
           <option value="">Todas las cuentas con movimientos</option>
+        </select>
+        <select class="btn" id="filtro-aux-mayor" onchange="renderMayor()" style="padding:7px 12px;min-width:180px;">
+          <option value="">Todos los auxiliares</option>
         </select>
         <div style="display:flex;align-items:center;gap:6px;">
           <span style="font-size:0.8rem;color:var(--text3);">Desde</span>
@@ -908,6 +1006,197 @@
       </div>
     </div>
 
+    <!-- ===== AUXILIARES: REGISTRO ===== -->
+    <div class="page" id="page-aux-registro">
+      <div class="page-header">
+        <div><div class="page-title">Clientes y Proveedores</div><div class="page-sub">Registro de auxiliares contables por RUT</div></div>
+        <button class="btn btn-accent" onclick="abrirModalAuxiliar()">+ Nuevo</button>
+      </div>
+      <div class="filters">
+        <input class="filter-input" placeholder="Buscar por nombre o RUT..." id="filtro-aux" oninput="renderAuxiliares()">
+        <select class="btn" id="filtro-aux-tipo" onchange="renderAuxiliares()" style="padding:7px 12px;">
+          <option value="">Todos</option>
+          <option value="cliente">Clientes</option>
+          <option value="proveedor">Proveedores</option>
+          <option value="ambos">Ambos</option>
+        </select>
+      </div>
+      <div id="contenido-auxiliares"></div>
+    </div>
+
+    <!-- ===== AUXILIARES: MAYOR ===== -->
+    <div class="page" id="page-aux-mayor">
+      <div class="page-header">
+        <div><div class="page-title">Mayor Auxiliar</div><div class="page-sub">Movimientos y saldo por cliente o proveedor</div></div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn" onclick="exportarMayorAuxPDF()">🖨️ PDF</button>
+          <button class="btn btn-green" onclick="exportarMayorAuxExcel()">📥 Excel</button>
+        </div>
+      </div>
+      <div class="filters">
+        <select class="btn" id="filtro-aux-mayor-rut" onchange="renderMayorAuxiliar()" style="padding:7px 12px;min-width:220px;">
+          <option value="">— Seleccionar auxiliar —</option>
+        </select>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:0.8rem;color:var(--text3);">Desde</span>
+          <input type="date" class="btn" id="aux-mayor-desde" onchange="renderMayorAuxiliar()" style="padding:6px 10px;color:var(--text);">
+          <span style="font-size:0.8rem;color:var(--text3);">Hasta</span>
+          <input type="date" class="btn" id="aux-mayor-hasta" onchange="renderMayorAuxiliar()" style="padding:6px 10px;color:var(--text);">
+          <span class="my-clear" onclick="document.getElementById('aux-mayor-desde').value='';document.getElementById('aux-mayor-hasta').value='';renderMayorAuxiliar()">✕ Todo</span>
+        </div>
+      </div>
+      <div id="contenido-mayor-aux"></div>
+    </div>
+
+    <!-- ===== AUXILIARES: ANTIGÜEDAD ===== -->
+    <div class="page" id="page-aux-antiguedad">
+      <div class="page-header">
+        <div><div class="page-title">Antigüedad de Saldos</div><div class="page-sub">Clasificación de deudas por tramos de días (30 / 60 / 90 / +90)</div></div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn" onclick="exportarAntiguedadPDF()">🖨️ PDF</button>
+          <button class="btn btn-green" onclick="exportarAntiguedadExcel()">📥 Excel</button>
+        </div>
+      </div>
+      <div class="filters">
+        <select class="btn" id="filtro-antig-tipo" onchange="renderAntiguedad()" style="padding:7px 12px;">
+          <option value="">Clientes y Proveedores</option>
+          <option value="cliente">Solo Clientes</option>
+          <option value="proveedor">Solo Proveedores</option>
+        </select>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:0.8rem;color:var(--text3);">Fecha de corte</span>
+          <input type="date" class="btn" id="antig-fecha-corte" onchange="renderAntiguedad()" style="padding:6px 10px;color:var(--text);">
+        </div>
+      </div>
+      <div id="contenido-antiguedad"></div>
+    </div>
+
+    <!-- MODAL AUXILIAR -->
+    <div class="modal-overlay" id="modal-auxiliar">
+      <div class="modal" style="max-width:560px;width:95%;">
+        <div class="modal-header"><span id="modal-aux-title">Nuevo Cliente / Proveedor</span><button class="btn" onclick="cerrarModal('modal-auxiliar')" style="padding:4px 10px;">✕</button></div>
+        <div class="modal-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="form-group"><label>Tipo *</label>
+              <select id="aux-tipo" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:7px;color:var(--text);padding:8px 10px;">
+                <option value="cliente">Cliente</option>
+                <option value="proveedor">Proveedor</option>
+                <option value="ambos">Ambos</option>
+              </select>
+            </div>
+            <div class="form-group"><label>RUT *</label><input type="text" id="aux-rut" placeholder="12.345.678-9" oninput="formatRut(this)"></div>
+            <div class="form-group full"><label>Razón Social / Nombre *</label><input type="text" id="aux-nombre" placeholder="Ej: Comercial Los Andes SpA"></div>
+            <div class="form-group"><label>Cuenta Contable</label>
+              <select id="aux-cuenta" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:7px;color:var(--text);padding:8px 10px;font-size:0.82rem;"></select>
+            </div>
+            <div class="form-group"><label>Giro / Actividad</label><input type="text" id="aux-giro" placeholder="Ej: Comercio al por mayor"></div>
+            <div class="form-group full"><label>Dirección</label><input type="text" id="aux-direccion" placeholder="Calle, número, ciudad"></div>
+            <div class="form-group"><label>Teléfono</label><input type="text" id="aux-telefono" placeholder="+56 9 1234 5678"></div>
+            <div class="form-group"><label>Email</label><input type="email" id="aux-email" placeholder="contacto@empresa.cl"></div>
+            <div class="form-group full"><label>Notas</label><input type="text" id="aux-notas" placeholder="Condiciones de pago, observaciones..."></div>
+          </div>
+        </div>
+        <div class="modal-footer"><button class="btn" onclick="cerrarModal('modal-auxiliar')">Cancelar</button><button class="btn btn-green" onclick="guardarAuxiliar()">💾 Guardar</button></div>
+      </div>
+    </div>
+
+    <!-- ===== INVENTARIO PRODUCTOS ===== -->
+    <div class="page" id="page-inv-productos">
+      <div class="page-header">
+        <div><div class="page-title">Productos</div><div class="page-sub">Catálogo de productos del inventario</div></div>
+        <button class="btn btn-accent" onclick="abrirModalProducto()">+ Nuevo Producto</button>
+      </div>
+      <div class="filters">
+        <input class="filter-input" placeholder="Buscar producto..." id="filtro-producto" oninput="renderProductos()">
+      </div>
+      <div id="contenido-productos"></div>
+    </div>
+
+    <!-- ===== INVENTARIO MOVIMIENTOS ===== -->
+    <div class="page" id="page-inv-movimientos">
+      <div class="page-header">
+        <div><div class="page-title">Movimientos de Inventario</div><div class="page-sub">Entradas, salidas y ajustes valorizados (Promedio Ponderado)</div></div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-green" onclick="abrirModalMovInv('entrada')">📥 Entrada</button>
+          <button class="btn btn-danger" onclick="abrirModalMovInv('salida')">📤 Salida</button>
+          <button class="btn" onclick="abrirModalMovInv('ajuste')">🔧 Ajuste</button>
+        </div>
+      </div>
+      <div class="filters">
+        <select class="btn" id="filtro-mov-prod" onchange="renderMovInventario()" style="padding:7px 12px;">
+          <option value="">Todos los productos</option>
+        </select>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:0.8rem;color:var(--text3);">Desde</span>
+          <input type="date" class="btn" id="mov-desde" onchange="renderMovInventario()" style="padding:6px 10px;color:var(--text);">
+          <span style="font-size:0.8rem;color:var(--text3);">Hasta</span>
+          <input type="date" class="btn" id="mov-hasta" onchange="renderMovInventario()" style="padding:6px 10px;color:var(--text);">
+          <span class="my-clear" onclick="document.getElementById('mov-desde').value='';document.getElementById('mov-hasta').value='';renderMovInventario()">✕ Todo</span>
+        </div>
+      </div>
+      <div id="contenido-mov-inv"></div>
+    </div>
+
+    <!-- ===== INVENTARIO RESUMEN ===== -->
+    <div class="page" id="page-inv-resumen">
+      <div class="page-header">
+        <div><div class="page-title">Resumen de Inventario</div><div class="page-sub">Stock valorizado y cierre mensual</div></div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn" onclick="exportarInventarioPDF()">🖨️ PDF</button>
+          <button class="btn btn-green" onclick="exportarInventarioExcel()">📥 Excel</button>
+          <button class="btn btn-accent" onclick="centralizarInventario()">🔗 Centralizar Costo Salidas</button>
+        </div>
+      </div>
+      <div class="filters">
+        <select class="btn" id="filtro-resumen-inv-mes" onchange="renderResumenInventario()" style="padding:7px 12px;">
+          <option value="">Todo el inventario</option>
+        </select>
+      </div>
+      <div id="contenido-resumen-inv"></div>
+    </div>
+
+    <!-- MODAL PRODUCTO -->
+    <div class="modal-overlay" id="modal-producto">
+      <div class="modal" style="max-width:520px;width:95%;">
+        <div class="modal-header"><span id="modal-prod-title">Nuevo Producto</span><button class="btn" onclick="cerrarModal('modal-producto')" style="padding:4px 10px;">✕</button></div>
+        <div class="modal-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="form-group"><label>Código *</label><input type="text" id="p-codigo" placeholder="Ej: PROD-001"></div>
+            <div class="form-group"><label>Unidad de Medida</label><input type="text" id="p-unidad" placeholder="Ej: un, kg, lt, caja"></div>
+            <div class="form-group full"><label>Nombre / Descripción *</label><input type="text" id="p-nombre" placeholder="Nombre del producto"></div>
+            <div class="form-group"><label>Cuenta Inventario</label>
+              <select id="p-cuenta-inv" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:7px;color:var(--text);padding:8px 10px;"></select>
+            </div>
+            <div class="form-group"><label>Cuenta Costo Ventas</label>
+              <select id="p-cuenta-costo" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:7px;color:var(--text);padding:8px 10px;"></select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer"><button class="btn" onclick="cerrarModal('modal-producto')">Cancelar</button><button class="btn btn-green" onclick="guardarProducto()">💾 Guardar</button></div>
+      </div>
+    </div>
+
+    <!-- MODAL MOVIMIENTO INVENTARIO -->
+    <div class="modal-overlay" id="modal-mov-inv">
+      <div class="modal" style="max-width:500px;width:95%;">
+        <div class="modal-header"><span id="modal-mov-title">Entrada de Inventario</span><button class="btn" onclick="cerrarModal('modal-mov-inv')" style="padding:4px 10px;">✕</button></div>
+        <div class="modal-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="form-group full"><label>Producto *</label>
+              <select id="mv-producto" onchange="mostrarInfoProducto()" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:7px;color:var(--text);padding:8px 10px;"></select>
+            </div>
+            <div id="mv-info-prod" style="display:none;grid-column:1/-1;background:var(--bg3);border-radius:8px;padding:8px 12px;font-size:0.82rem;color:var(--text2);"></div>
+            <div class="form-group"><label>Fecha *</label><input type="date" id="mv-fecha"></div>
+            <div class="form-group"><label>Cantidad *</label><input type="number" id="mv-cantidad" min="0.001" step="0.001" placeholder="0"></div>
+            <div class="form-group" id="mv-precio-grupo"><label>Precio Unitario ($) *</label><input type="text" id="mv-precio" oninput="fmtMiles(this);calcularTotalMov()" placeholder="0"></div>
+            <div class="form-group"><label>Total Movimiento ($)</label><input type="text" id="mv-total" readonly style="color:var(--accent);font-family:'DM Mono',monospace;"></div>
+            <div class="form-group full"><label>Referencia / Glosa</label><input type="text" id="mv-glosa" placeholder="Ej: Factura 1234, ajuste inventario..."></div>
+          </div>
+        </div>
+        <div class="modal-footer"><button class="btn" onclick="cerrarModal('modal-mov-inv')">Cancelar</button><button class="btn btn-green" onclick="guardarMovInventario()">💾 Guardar</button></div>
+      </div>
+    </div>
+
   </main>
 </div>
 
@@ -1061,12 +1350,16 @@
 
 <script>
 // ===== IndexedDB =====
-const DB_NAME = 'ContaCL', DB_VERSION = 3;
+// ===== MULTI-EMPRESA =====
+const DB_VERSION = 5;
 let db;
+let empresaActualId = null; // ID de la empresa activa (ej: 'emp_1')
+
+function getDBName() { return `ContaCL_${empresaActualId}`; }
 
 function openDB() {
   return new Promise((res, rej) => {
-    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    const req = indexedDB.open(getDBName(), DB_VERSION);
     req.onerror = () => rej(req.error);
     req.onsuccess = () => { db = req.result; res(db); };
     req.onupgradeneeded = (e) => {
@@ -1077,8 +1370,27 @@ function openDB() {
       if (!d.objectStoreNames.contains('trabajadores')) d.createObjectStore('trabajadores', {keyPath:'id', autoIncrement:true});
       if (!d.objectStoreNames.contains('liquidaciones')) d.createObjectStore('liquidaciones', {keyPath:'id', autoIncrement:true});
       if (!d.objectStoreNames.contains('params_rem')) d.createObjectStore('params_rem', {keyPath:'clave'});
+      if (!d.objectStoreNames.contains('productos')) d.createObjectStore('productos', {keyPath:'id', autoIncrement:true});
+      if (!d.objectStoreNames.contains('mov_inv')) d.createObjectStore('mov_inv', {keyPath:'id', autoIncrement:true});
+      if (!d.objectStoreNames.contains('auxiliares')) d.createObjectStore('auxiliares', {keyPath:'id', autoIncrement:true});
     };
   });
+}
+
+// Gestión de empresas (lista guardada en localStorage)
+function getEmpresas() {
+  try { return JSON.parse(localStorage.getItem('contacl-empresas') || '[]'); } catch(e) { return []; }
+}
+function saveEmpresas(lista) {
+  try { localStorage.setItem('contacl-empresas', JSON.stringify(lista)); } catch(e) {}
+}
+function getEmpresaActual() {
+  const lista = getEmpresas();
+  return lista.find(e => e.id === empresaActualId) || {};
+}
+function setEmpresaActual(id) {
+  empresaActualId = id;
+  try { localStorage.setItem('contacl-empresa-activa', id); } catch(e) {}
 }
 const getAll = store => new Promise((res,rej) => { const r = db.transaction(store,'readonly').objectStore(store).getAll(); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); });
 const put = (store,obj) => new Promise((res,rej) => { const r = db.transaction(store,'readwrite').objectStore(store).put(obj); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); });
@@ -1133,34 +1445,55 @@ const PLAN_INICIAL = [
 ];
 
 let cuentas=[], asientos=[], cierres=[], trabajadores=[], liquidaciones=[], paramsRem={},
+    productos=[], movInventario=[], auxiliares=[],
     editingAsientoId=null, editingCuentaCodigo=null, lineaCount=0,
-    editingTrabajadorId=null;
+    editingTrabajadorId=null, editingProductoId=null, editingAuxiliarId=null;
 
 // ===== INIT =====
 async function init() {
+  // Recuperar empresa activa
+  try { empresaActualId = localStorage.getItem('contacl-empresa-activa'); } catch(e) {}
+  const empresas = getEmpresas();
+
+  // Si no hay empresas, mostrar pantalla de creación
+  if (!empresas.length || !empresaActualId) {
+    mostrarSelectorEmpresas();
+    return;
+  }
+
+  await cargarEmpresaDB();
+}
+
+async function cargarEmpresaDB() {
+  if (db) { try { db.close(); } catch(e) {} }
   await openDB();
   cuentas = await getAll('cuentas');
   asientos = await getAll('asientos');
   cierres = await getAll('cierres');
   trabajadores = await getAll('trabajadores');
   liquidaciones = await getAll('liquidaciones');
+  productos = await getAll('productos');
+  movInventario = await getAll('mov_inv');
+  auxiliares = await getAll('auxiliares');
   const pArr = await getAll('params_rem');
   paramsRem = {}; pArr.forEach(p => paramsRem[p.clave] = p.valor);
   if (!Object.keys(paramsRem).length) await initParamsRem();
   if (!cuentas.length) { for (const c of PLAN_INICIAL) await put('cuentas',c); cuentas = await getAll('cuentas'); }
+
+  // Actualizar empresa en la variable empresa para compatibilidad con informes
+  empresa = getEmpresaActual();
+
   const hoy = new Date();
-  const mesActual = hoy.getMonth() + 1;
-  const anioActual = hoy.getFullYear();
-
-  // Poblar todos los selectores de mes/año
-  poblarPickersGlobales(anioActual, mesActual);
-
+  poblarPickersGlobales(hoy.getFullYear(), hoy.getMonth()+1);
   document.getElementById('dash-fecha').textContent = hoy.toLocaleDateString('es-CL',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-  // Restaurar tema guardado
   try { const t = localStorage.getItem('contacl-tema'); if (t) setTema(t); } catch(e) {}
-  // Cargar datos empresa
   cargarEmpresa();
-  // nav events
+  actualizarSelectorEmpresaHeader();
+
+  // Ocultar selector, mostrar app
+  document.getElementById('pantalla-empresas').style.display = 'none';
+  document.getElementById('app-main').style.display = 'flex';
+
   document.querySelectorAll('.nav-item').forEach(el => {
     el.addEventListener('click', () => {
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -1178,13 +1511,15 @@ function renderAll() {
   renderDashboard(); renderCuentas(); renderDiario(); renderMayor();
   renderCierres(); renderBalance(); renderBalance8(); renderEER(); renderIVA(); populateMayorSelect();
   renderTrabajadores(); renderLiquidaciones(); renderLibroRem(); renderParamsRem();
+  renderProductos(); renderMovInventario(); renderResumenInventario();
+  renderAuxiliares(); poblarSelectAuxiliar();
 }
 
 // ===== EMPRESA =====
 let empresa = {};
 
 function cargarEmpresa() {
-  try { empresa = JSON.parse(localStorage.getItem('contacl-empresa') || '{}'); } catch(e) { empresa = {}; }
+  empresa = getEmpresaActual();
   const campos = ['nombre','rut','giro','direccion','ciudad','region','telefono','email'];
   campos.forEach(c => {
     const el = document.getElementById('emp-'+c);
@@ -1194,7 +1529,7 @@ function cargarEmpresa() {
 }
 
 function guardarEmpresa() {
-  empresa = {
+  const datos = {
     nombre:    document.getElementById('emp-nombre').value.trim(),
     rut:       document.getElementById('emp-rut').value.trim(),
     giro:      document.getElementById('emp-giro').value.trim(),
@@ -1204,9 +1539,13 @@ function guardarEmpresa() {
     telefono:  document.getElementById('emp-telefono').value.trim(),
     email:     document.getElementById('emp-email').value.trim(),
   };
-  try { localStorage.setItem('contacl-empresa', JSON.stringify(empresa)); } catch(e) {}
+  // Actualizar en lista de empresas
+  const lista = getEmpresas();
+  const idx = lista.findIndex(e => e.id === empresaActualId);
+  if (idx >= 0) { Object.assign(lista[idx], datos); saveEmpresas(lista); }
+  empresa = datos;
   actualizarPreviewEmpresa();
-  // Actualizar encabezados en informes ya renderizados
+  actualizarSelectorEmpresaHeader();
   document.querySelectorAll('.informe-empresa-header').forEach(el => el.outerHTML = empresaHeaderHTML());
   renderBalance(); renderEER(); renderIVA(); renderBalance8();
   alert('✓ Datos de la empresa guardados correctamente');
@@ -1609,13 +1948,27 @@ function addLinea(data=null) {
   const opts = cuentas.sort((a,b)=>a.codigo.localeCompare(b.codigo)).map(c=>`<option value="${c.codigo}" ${data&&data.cuenta===c.codigo?'selected':''}>${c.codigo} — ${c.nombre}</option>`).join('');
   const debVal = data ? fmtMiles(data.debito||0) : '';
   const creVal = data ? fmtMiles(data.credito||0) : '';
+  // Opciones auxiliares
+  const auxOpts = '<option value="">— Sin auxiliar —</option>' +
+    auxiliares.map(a=>`<option value="${a.id}" ${data&&data.auxiliarId===a.id?'selected':''}>[${a.rut}] ${a.nombre}</option>`).join('');
   const div=document.createElement('div'); div.className='linea-row'; div.id='linea-'+id;
   div.innerHTML=`
-    <select onchange="actualizarTotales()" style="font-size:0.83rem;padding:8px 10px;font-family:'DM Mono',monospace;width:100%;"><option value="">— Seleccione cuenta —</option>${opts}</select>
+    <select onchange="actualizarTotales();actualizarAuxSelector(this,${id})" style="font-size:0.83rem;padding:8px 10px;font-family:'DM Mono',monospace;width:100%;"><option value="">— Seleccione cuenta —</option>${opts}</select>
     <input type="text" inputmode="numeric" placeholder="0" value="${debVal}" oninput="formatearMiles(this)" onblur="actualizarTotales()" style="font-family:'DM Mono',monospace;text-align:right;width:100%;font-size:0.88rem;padding:8px 10px;" data-raw="${data?data.debito||0:0}">
     <input type="text" inputmode="numeric" placeholder="0" value="${creVal}" oninput="formatearMiles(this)" onblur="actualizarTotales()" style="font-family:'DM Mono',monospace;text-align:right;width:100%;font-size:0.88rem;padding:8px 10px;" data-raw="${data?data.credito||0:0}">
-    <button class="btn-icon" onclick="eliminarLinea(${id})">✕</button>`;
+    <button class="btn-icon" onclick="eliminarLinea(${id})">✕</button>
+    <div class="linea-aux-wrap" id="aux-wrap-${id}" style="grid-column:1/-1;display:none;padding:0 2px 4px;">
+      <select class="linea-aux-selector" id="aux-sel-${id}" style="width:100%;">${auxOpts}</select>
+    </div>`;
   document.getElementById('lineas-container').appendChild(div);
+  // Si viene con auxiliarId, mostrar selector
+  if (data && data.auxiliarId) {
+    const wrap = document.getElementById(`aux-wrap-${id}`);
+    if (wrap) wrap.style.display = '';
+  }
+  // Auto-mostrar si la cuenta ya es de auxiliar
+  const sel = div.querySelector('select');
+  if (data && data.cuenta) actualizarAuxSelector(sel, id);
 }
 
 function formatearMiles(input) {
@@ -1646,6 +1999,21 @@ function actualizarTotales() {
   else{ch.className='balance-check balance-err';ch.textContent=`✗ Diferencia: ${fmt(Math.abs(deb-cre))}`;}
 }
 
+// Cuentas que requieren auxiliar: clientes, proveedores, deudores, acreedores
+const CUENTAS_AUXILIAR = ['1-02-001-0001','1-02-001-0002','2-01-001-0001','2-01-001-0002'];
+
+function esCtaAuxiliar(codigo) {
+  if (!codigo) return false;
+  return CUENTAS_AUXILIAR.includes(codigo) ||
+    auxiliares.some(a => a.cuenta === codigo);
+}
+
+function actualizarAuxSelector(selectEl, lineaId) {
+  const wrap = document.getElementById(`aux-wrap-${lineaId}`);
+  if (!wrap) return;
+  wrap.style.display = esCtaAuxiliar(selectEl.value) ? '' : 'none';
+}
+
 function getLineas() {
   const lineas=[];
   document.querySelectorAll('#lineas-container .linea-row').forEach(row=>{
@@ -1653,7 +2021,12 @@ function getLineas() {
     const cuenta=sel.value;
     const debito = parseFloat(ins[0].dataset.raw||0) || parseMiles(ins[0].value);
     const credito = parseFloat(ins[1].dataset.raw||0) || parseMiles(ins[1].value);
-    if(cuenta&&(debito>0||credito>0)) lineas.push({cuenta,debito,credito});
+    if(cuenta&&(debito>0||credito>0)) {
+      // Capturar auxiliar si existe
+      const auxSel = row.querySelector('.linea-aux-selector');
+      const auxiliarId = auxSel && auxSel.value ? parseInt(auxSel.value) : null;
+      lineas.push({cuenta, debito, credito, auxiliarId: auxiliarId||null});
+    }
   });
   return lineas;
 }
@@ -1711,7 +2084,7 @@ function renderDiario() {
       html+=`<tr>
         ${i===0?`<td class="mono" rowspan="${a.lineas.length}" style="color:var(--text3);vertical-align:top;padding-top:12px;">#${String(a.id).padStart(4,'0')}</td>`:''}
         ${i===0?`<td rowspan="${a.lineas.length}" style="vertical-align:top;padding-top:12px;">${a.fecha}</td>`:''}
-        <td><div class="tag-cuenta">${l.cuenta}</div><div style="font-size:0.84rem;">${cuenta?cuenta.nombre:l.cuenta}</div></td>
+        <td><div class="tag-cuenta">${l.cuenta}</div><div style="font-size:0.84rem;">${cuenta?cuenta.nombre:l.cuenta}</div>${l.auxiliarId?`<div style="font-size:0.72rem;color:var(--accent);margin-top:2px;">👤 ${(auxiliares.find(a=>a.id===l.auxiliarId)||{}).nombre||''}</div>`:''}</td>
         ${i===0?`<td rowspan="${a.lineas.length}" style="vertical-align:top;padding-top:12px;"><div style="font-size:0.86rem;">${a.glosa}</div>${a.referencia?`<div style="font-size:0.74rem;color:var(--text3);">Ref: ${a.referencia}</div>`:''}</td>`:''}
         <td class="text-right">${l.debito>0?`<span class="amount-pos">${fmt(l.debito)}</span>`:'—'}</td>
         <td class="text-right">${l.credito>0?`<span class="amount-neg">${fmt(l.credito)}</span>`:'—'}</td>
@@ -1734,31 +2107,54 @@ function populateMayorSelect() {
   const sel=document.getElementById('filtro-cuenta-mayor'); const cur=sel.value;
   const conMov=new Set(asientos.flatMap(a=>a.lineas.map(l=>l.cuenta)));
   sel.innerHTML='<option value="">Todas las cuentas con movimientos</option>'+cuentas.filter(c=>conMov.has(c.codigo)).sort((a,b)=>a.codigo.localeCompare(b.codigo)).map(c=>`<option value="${c.codigo}" ${cur===c.codigo?'selected':''}>${c.codigo} — ${c.nombre}</option>`).join('');
+  // Poblar auxiliar filter en mayor
+  const selAux = document.getElementById('filtro-aux-mayor');
+  if (selAux) {
+    const curAux = selAux.value;
+    const auxConMov = auxiliares.filter(a => asientos.some(as=>as.lineas.some(l=>l.auxiliarId===a.id)));
+    selAux.innerHTML = '<option value="">Todos los auxiliares</option>' +
+      auxConMov.map(a=>`<option value="${a.id}" ${String(a.id)===curAux?'selected':''}>[${a.rut}] ${a.nombre}</option>`).join('');
+  }
 }
 
 function renderMayor() {
   const desde=document.getElementById('mayor-desde').value;
   const hasta=document.getElementById('mayor-hasta').value;
   const filtroCuenta=document.getElementById('filtro-cuenta-mayor').value;
+  const filtroAux = document.getElementById('filtro-aux-mayor')?.value;
+  const filtroAuxId = filtroAux ? parseInt(filtroAux) : null;
+
   const lista=filtroCuenta?cuentas.filter(c=>c.codigo===filtroCuenta):cuentas.filter(c=>asientos.some(a=>a.lineas.some(l=>l.cuenta===c.codigo)));
   if(!lista.length){document.getElementById('mayor-contenido').innerHTML=`<div class="empty-state"><div class="empty-icon">📒</div><div class="empty-title">Sin movimientos</div></div>`;return;}
   const tipoBadge={Activo:'badge-blue',Pasivo:'badge-red',Patrimonio:'badge-purple',Ingreso:'badge-green',Gasto:'badge-yellow'};
   let html='';
   lista.sort((a,b)=>a.codigo.localeCompare(b.codigo)).forEach(cuenta=>{
-    const movs=asientos.filter(a=>(!desde||a.fecha>=desde)&&(!hasta||a.fecha<=hasta)&&a.lineas.some(l=>l.cuenta===cuenta.codigo)).sort((a,b)=>a.fecha.localeCompare(b.fecha));
+    let movs=asientos.filter(a=>
+      (!desde||a.fecha>=desde)&&(!hasta||a.fecha<=hasta)&&
+      a.lineas.some(l=>l.cuenta===cuenta.codigo &&
+        (!filtroAuxId || l.auxiliarId===filtroAuxId))
+    ).sort((a,b)=>a.fecha.localeCompare(b.fecha));
     if(!movs.length)return;
     let saldoAcum=0, rowsHtml='';
-    movs.forEach(a=>{ a.lineas.filter(l=>l.cuenta===cuenta.codigo).forEach(l=>{
+    movs.forEach(a=>{ a.lineas.filter(l=>l.cuenta===cuenta.codigo && (!filtroAuxId||l.auxiliarId===filtroAuxId)).forEach(l=>{
       const dif=cuenta.naturaleza==='Deudora'?(l.debito||0)-(l.credito||0):(l.credito||0)-(l.debito||0);
       saldoAcum+=dif;
-      rowsHtml+=`<tr><td class="mono" style="color:var(--text3)">#${String(a.id).padStart(4,'0')}</td><td>${a.fecha}</td><td style="max-width:220px;font-size:0.84rem;">${a.glosa}</td><td class="text-right">${l.debito>0?`<span class="amount-pos">${fmt(l.debito)}</span>`:'—'}</td><td class="text-right">${l.credito>0?`<span class="amount-neg">${fmt(l.credito)}</span>`:'—'}</td><td class="text-right mono">${fmt(saldoAcum)}</td></tr>`;
+      const aux = l.auxiliarId ? auxiliares.find(x=>x.id===l.auxiliarId) : null;
+      rowsHtml+=`<tr>
+        <td class="mono" style="color:var(--text3)">#${String(a.id).padStart(4,'0')}</td>
+        <td>${a.fecha}</td>
+        <td style="max-width:220px;font-size:0.84rem;">${a.glosa}${aux?`<div style="font-size:0.72rem;color:var(--accent);margin-top:1px;">👤 ${aux.nombre} (${aux.rut})</div>`:''}</td>
+        <td class="text-right">${l.debito>0?`<span class="amount-pos">${fmt(l.debito)}</span>`:'—'}</td>
+        <td class="text-right">${l.credito>0?`<span class="amount-neg">${fmt(l.credito)}</span>`:'—'}</td>
+        <td class="text-right mono">${fmt(saldoAcum)}</td>
+      </tr>`;
     });});
     html+=`<div class="mayor-card">
       <div class="mayor-card-header">
         <div><div style="display:flex;align-items:center;gap:8px;"><div class="mayor-card-title">${cuenta.nombre}</div><span class="badge ${tipoBadge[cuenta.tipo]||''}">${cuenta.tipo}</span></div><div class="tag-cuenta">${cuenta.codigo} · ${cuenta.naturaleza}</div></div>
         <div class="saldo-label">Saldo: <span class="${saldoAcum>=0?'amount-pos':'amount-neg'}">${fmt(saldoAcum)}</span></div>
       </div>
-      <table><thead><tr><th>N°</th><th>Fecha</th><th>Descripción</th><th class="text-right">Débito</th><th class="text-right">Crédito</th><th class="text-right">Saldo</th></tr></thead><tbody>${rowsHtml}</tbody></table>
+      <table><thead><tr><th>N°</th><th>Fecha</th><th>Descripción / Auxiliar</th><th class="text-right">Débito</th><th class="text-right">Crédito</th><th class="text-right">Saldo</th></tr></thead><tbody>${rowsHtml}</tbody></table>
     </div>`;
   });
   document.getElementById('mayor-contenido').innerHTML=html||`<div class="empty-state"><div class="empty-icon">📒</div><div class="empty-title">Sin movimientos en este período</div></div>`;
@@ -2016,19 +2412,30 @@ document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click
 
 // ===== EXPORT/IMPORT =====
 async function exportarDB() {
-  const data={cuentas,asientos,exportado:new Date().toISOString()};
+  const nombreEmp = empresa.nombre || empresaActualId;
+  const data={cuentas,asientos,cierres,trabajadores,liquidaciones,productos,movInventario,auxiliares,
+    empresa: getEmpresaActual(), exportado:new Date().toISOString()};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
-  a.download=`ContaCL_${new Date().toISOString().slice(0,10)}.json`; a.click();
+  a.download=`ContaCL_${nombreEmp.replace(/\s/g,'_')}_${new Date().toISOString().slice(0,10)}.json`; a.click();
 }
 
 async function importarDB(event) {
   const file=event.target.files[0]; if(!file)return;
   const text=await file.text(); const data=JSON.parse(text);
-  if(!confirm(`¿Importar backup del ${(data.exportado||'').slice(0,10)}? Se sobreescribirán los datos actuales.`))return;
+  if(!confirm(`¿Importar backup${data.exportado?' del '+data.exportado.slice(0,10):''}? Se sobreescribirán los datos actuales de esta empresa.`))return;
   if(data.cuentas) for(const c of data.cuentas) await put('cuentas',c);
   if(data.asientos) for(const a of data.asientos) await put('asientos',a);
+  if(data.cierres) for(const c of data.cierres) await put('cierres',c);
+  if(data.trabajadores) for(const t of data.trabajadores) await put('trabajadores',t);
+  if(data.liquidaciones) for(const l of data.liquidaciones) await put('liquidaciones',l);
+  if(data.productos) for(const p of data.productos) await put('productos',p);
+  if(data.movInventario) for(const m of data.movInventario) await put('mov_inv',m);
+  if(data.auxiliares) for(const x of data.auxiliares) await put('auxiliares',x);
   cuentas=await getAll('cuentas'); asientos=await getAll('asientos');
+  cierres=await getAll('cierres'); trabajadores=await getAll('trabajadores');
+  liquidaciones=await getAll('liquidaciones'); productos=await getAll('productos');
+  movInventario=await getAll('mov_inv'); auxiliares=await getAll('auxiliares');
   renderAll(); event.target.value='';
   alert('✓ Datos importados correctamente');
 }
@@ -3477,6 +3884,1116 @@ function exportarLibroRemExcel() {
   const blob = new Blob([xml],{type:'application/vnd.ms-excel'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
   a.download=`LibroRem_${periodo}.xls`; a.click();
+}
+
+
+// =========================================================
+// ===== MULTI-EMPRESA =====================================
+// =========================================================
+
+function mostrarSelectorEmpresas() {
+  document.getElementById('pantalla-empresas').style.display = 'flex';
+  document.getElementById('app-main').style.display = 'none';
+  document.getElementById('form-nueva-empresa').style.display = 'none';
+  renderListaEmpresas();
+}
+
+function renderListaEmpresas() {
+  const lista = getEmpresas();
+  const cont = document.getElementById('lista-empresas');
+  if (!lista.length) {
+    cont.innerHTML = `<div style="text-align:center;color:var(--text3);padding:2rem 0;font-size:0.85rem;">No hay empresas creadas.<br>Crea tu primera empresa para comenzar.</div>`;
+    return;
+  }
+  cont.innerHTML = lista.map(e => `
+    <div class="emp-card ${e.id === empresaActualId ? 'activa' : ''}" onclick="seleccionarEmpresa('${e.id}')">
+      <div>
+        <div class="emp-card-nombre">${e.nombre || '(Sin nombre)'}</div>
+        <div class="emp-card-rut">${e.rut ? 'RUT: ' + e.rut : ''} ${e.giro || ''}</div>
+      </div>
+      <div class="emp-card-acciones" onclick="event.stopPropagation()">
+        <button class="btn" style="font-size:0.72rem;padding:3px 8px;" onclick="editarEmpresaEnLista('${e.id}')">✏️</button>
+        <button class="btn btn-danger" style="font-size:0.72rem;padding:3px 8px;" onclick="eliminarEmpresaLista('${e.id}')">🗑️</button>
+      </div>
+    </div>`).join('');
+}
+
+function crearEmpresa() {
+  const nombre = document.getElementById('ne-nombre').value.trim();
+  if (!nombre) { alert('El nombre es obligatorio'); return; }
+  const lista = getEmpresas();
+  if (lista.length >= 10) { alert('Máximo 10 empresas'); return; }
+  const id = 'emp_' + Date.now();
+  const nueva = {
+    id, nombre,
+    rut: document.getElementById('ne-rut').value.trim(),
+    giro: document.getElementById('ne-giro').value.trim(),
+    direccion: '', ciudad: '', region: '', telefono: '', email: ''
+  };
+  lista.push(nueva);
+  saveEmpresas(lista);
+  document.getElementById('ne-nombre').value = '';
+  document.getElementById('ne-rut').value = '';
+  document.getElementById('ne-giro').value = '';
+  document.getElementById('form-nueva-empresa').style.display = 'none';
+  seleccionarEmpresa(id);
+}
+
+async function seleccionarEmpresa(id) {
+  setEmpresaActual(id);
+  await cargarEmpresaDB();
+}
+
+function editarEmpresaEnLista(id) {
+  const lista = getEmpresas();
+  const e = lista.find(x => x.id === id);
+  if (!e) return;
+  const nombre = prompt('Nombre de la empresa:', e.nombre);
+  if (nombre === null) return;
+  e.nombre = nombre.trim() || e.nombre;
+  const rut = prompt('RUT:', e.rut || '');
+  if (rut !== null) e.rut = rut.trim();
+  saveEmpresas(lista);
+  if (id === empresaActualId) { empresa = e; actualizarSelectorEmpresaHeader(); }
+  renderListaEmpresas();
+}
+
+async function eliminarEmpresaLista(id) {
+  const lista = getEmpresas();
+  const e = lista.find(x => x.id === id);
+  if (!confirm(`¿Eliminar "${e?.nombre}"? Se borrarán TODOS los datos contables de esta empresa. Esta acción no se puede deshacer.`)) return;
+  // Eliminar la IndexedDB de esta empresa
+  try { indexedDB.deleteDatabase('ContaCL_' + id); } catch(err) {}
+  const nuevaLista = lista.filter(x => x.id !== id);
+  saveEmpresas(nuevaLista);
+  if (id === empresaActualId) {
+    empresaActualId = null;
+    try { localStorage.removeItem('contacl-empresa-activa'); } catch(e) {}
+    mostrarSelectorEmpresas();
+  } else {
+    renderListaEmpresas();
+  }
+}
+
+function actualizarSelectorEmpresaHeader() {
+  const lista = getEmpresas();
+  const actual = lista.find(e => e.id === empresaActualId) || {};
+  const el = document.getElementById('emp-nombre-activa');
+  const elRut = document.getElementById('emp-rut-activa');
+  if (el) el.textContent = actual.nombre || '—';
+  if (elRut) elRut.textContent = actual.rut ? 'RUT: ' + actual.rut : '';
+  const sel = document.getElementById('sel-empresa-rapido');
+  if (sel) {
+    sel.innerHTML = lista.map(e => `<option value="${e.id}" ${e.id === empresaActualId ? 'selected' : ''}>${e.nombre}</option>`).join('');
+  }
+}
+
+async function cambiarEmpresaRapido(id) {
+  if (id === empresaActualId) return;
+  setEmpresaActual(id);
+  await cargarEmpresaDB();
+}
+
+// =========================================================
+// ===== MÓDULO INVENTARIO VALORIZADO ======================
+// =========================================================
+
+// Calcular stock y costo promedio ponderado para cada producto
+function calcularStockProductos() {
+  const resultado = {};
+  productos.forEach(p => {
+    resultado[p.id] = { stock: 0, costoTotal: 0, costoPromedio: 0, entradas: 0, salidas: 0, montoEntradas: 0, montoSalidas: 0 };
+  });
+  // Procesar movimientos en orden cronológico
+  const movOrden = [...movInventario].sort((a,b) => a.fecha.localeCompare(b.fecha) || a.id - b.id);
+  movOrden.forEach(m => {
+    if (!resultado[m.productoId]) return;
+    const r = resultado[m.productoId];
+    if (m.tipo === 'entrada') {
+      // Promedio Ponderado: nuevo costo = (stockAnterior × costoAnterior + cantidad × precioUnitario) / nuevoStock
+      const nuevoStock = r.stock + m.cantidad;
+      r.costoTotal = r.stock * r.costoPromedio + m.cantidad * m.precioUnitario;
+      r.costoPromedio = nuevoStock > 0 ? r.costoTotal / nuevoStock : 0;
+      r.stock = nuevoStock;
+      r.entradas += m.cantidad;
+      r.montoEntradas += m.cantidad * m.precioUnitario;
+    } else if (m.tipo === 'salida') {
+      // Salida valorizada al costo promedio actual
+      const costeoSalida = m.cantidad * r.costoPromedio;
+      r.costoTotal = Math.max(0, r.costoTotal - costeoSalida);
+      r.stock = Math.max(0, r.stock - m.cantidad);
+      r.salidas += m.cantidad;
+      r.montoSalidas += costeoSalida;
+    } else if (m.tipo === 'ajuste') {
+      // Ajuste: reemplaza stock y precio
+      r.stock = m.cantidad;
+      r.costoPromedio = m.precioUnitario;
+      r.costoTotal = m.cantidad * m.precioUnitario;
+    }
+  });
+  return resultado;
+}
+
+// Calcular stock hasta una fecha específica
+function calcularStockHasta(fechaHasta) {
+  const resultado = {};
+  productos.forEach(p => {
+    resultado[p.id] = { stock: 0, costoTotal: 0, costoPromedio: 0, entradas: 0, salidas: 0, montoEntradas: 0, montoSalidas: 0 };
+  });
+  const movOrden = [...movInventario]
+    .filter(m => !fechaHasta || m.fecha <= fechaHasta)
+    .sort((a,b) => a.fecha.localeCompare(b.fecha) || a.id - b.id);
+  movOrden.forEach(m => {
+    if (!resultado[m.productoId]) return;
+    const r = resultado[m.productoId];
+    if (m.tipo === 'entrada') {
+      const nuevoStock = r.stock + m.cantidad;
+      r.costoTotal = r.stock * r.costoPromedio + m.cantidad * m.precioUnitario;
+      r.costoPromedio = nuevoStock > 0 ? r.costoTotal / nuevoStock : 0;
+      r.stock = nuevoStock;
+      r.entradas += m.cantidad;
+      r.montoEntradas += m.cantidad * m.precioUnitario;
+    } else if (m.tipo === 'salida') {
+      const costeoSalida = m.cantidad * r.costoPromedio;
+      r.costoTotal = Math.max(0, r.costoTotal - costeoSalida);
+      r.stock = Math.max(0, r.stock - m.cantidad);
+      r.salidas += m.cantidad;
+      r.montoSalidas += costeoSalida;
+    } else if (m.tipo === 'ajuste') {
+      r.stock = m.cantidad;
+      r.costoPromedio = m.precioUnitario;
+      r.costoTotal = m.cantidad * m.precioUnitario;
+    }
+  });
+  return resultado;
+}
+
+// ===== RENDER PRODUCTOS =====
+function renderProductos() {
+  const filtro = (document.getElementById('filtro-producto')?.value || '').toLowerCase();
+  const stock = calcularStockProductos();
+  const lista = productos.filter(p =>
+    !filtro || p.nombre.toLowerCase().includes(filtro) || p.codigo.toLowerCase().includes(filtro)
+  ).sort((a,b) => a.codigo.localeCompare(b.codigo));
+
+  if (!lista.length) {
+    document.getElementById('contenido-productos').innerHTML = `<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-title">Sin productos</div><div class="empty-sub">Agrega productos al catálogo para comenzar</div></div>`;
+    return;
+  }
+
+  const $ = v => Math.round(v).toLocaleString('es-CL');
+  document.getElementById('contenido-productos').innerHTML = `
+  <div class="table-wrap"><table>
+    <thead><tr><th>Código</th><th>Nombre</th><th>Unidad</th><th class="text-right">Stock</th><th class="text-right">Costo Prom.</th><th class="text-right">Valor Total</th><th>Acciones</th></tr></thead>
+    <tbody>
+    ${lista.map(p => {
+      const s = stock[p.id] || {};
+      const total = (s.stock||0) * (s.costoPromedio||0);
+      return `<tr>
+        <td class="mono" style="color:var(--accent)">${p.codigo}</td>
+        <td style="font-weight:600;">${p.nombre}</td>
+        <td><span class="badge">${p.unidad||'un'}</span></td>
+        <td class="text-right mono ${s.stock<=0?'amount-neg':''}">${((s.stock)||0).toLocaleString('es-CL',{minimumFractionDigits:0,maximumFractionDigits:3})}</td>
+        <td class="text-right mono">$ ${$((s.costoPromedio)||0)}</td>
+        <td class="text-right mono" style="font-weight:600;color:var(--green)">$ ${$(total)}</td>
+        <td><div style="display:flex;gap:4px;">
+          <button class="btn" style="font-size:0.72rem;padding:3px 8px;" onclick="abrirModalProducto(${p.id})">✏️</button>
+          <button class="btn btn-danger" style="font-size:0.72rem;padding:3px 8px;" onclick="eliminarProducto(${p.id})">🗑️</button>
+        </div></td>
+      </tr>`;
+    }).join('')}
+    </tbody>
+    <tfoot>
+      <tr style="background:var(--bg3);font-weight:700;">
+        <td colspan="5" style="text-align:right;">TOTAL INVENTARIO VALORIZADO</td>
+        <td class="text-right mono" style="color:var(--green);">$ ${$(lista.reduce((s,p)=>{ const st=stock[p.id]||{}; return s+(st.stock||0)*(st.costoPromedio||0); },0))}</td>
+        <td></td>
+      </tr>
+    </tfoot>
+  </table></div>`;
+}
+
+// ===== MODAL PRODUCTO =====
+function abrirModalProducto(id=null) {
+  editingProductoId = id;
+  const p = id ? productos.find(x=>x.id===id) : {};
+  document.getElementById('modal-prod-title').textContent = id ? 'Editar Producto' : 'Nuevo Producto';
+  document.getElementById('p-codigo').value = p.codigo || '';
+  document.getElementById('p-nombre').value = p.nombre || '';
+  document.getElementById('p-unidad').value = p.unidad || 'un';
+  // Poblar cuentas
+  const activos = cuentas.filter(c=>c.tipo==='Activo').sort((a,b)=>a.codigo.localeCompare(b.codigo));
+  const gastos = cuentas.filter(c=>c.tipo==='Gasto').sort((a,b)=>a.codigo.localeCompare(b.codigo));
+  document.getElementById('p-cuenta-inv').innerHTML = activos.map(c=>`<option value="${c.codigo}" ${p.cuentaInv===c.codigo?'selected':''}>${c.codigo} — ${c.nombre}</option>`).join('');
+  document.getElementById('p-cuenta-costo').innerHTML = gastos.map(c=>`<option value="${c.codigo}" ${p.cuentaCosto===c.codigo?'selected':''}>${c.codigo} — ${c.nombre}</option>`).join('');
+  // Preseleccionar Existencias Mercaderías y Costo Ventas por defecto
+  if (!p.cuentaInv) { const def = activos.find(c=>c.codigo==='1-02-003-0001'); if(def) document.getElementById('p-cuenta-inv').value=def.codigo; }
+  if (!p.cuentaCosto) { const def = gastos.find(c=>c.codigo==='5-01-001-0001'); if(def) document.getElementById('p-cuenta-costo').value=def.codigo; }
+  document.getElementById('modal-producto').classList.add('open');
+}
+
+async function guardarProducto() {
+  const codigo = document.getElementById('p-codigo').value.trim();
+  const nombre = document.getElementById('p-nombre').value.trim();
+  if (!codigo || !nombre) { alert('Código y nombre son obligatorios'); return; }
+  const obj = {
+    codigo, nombre,
+    unidad: document.getElementById('p-unidad').value.trim() || 'un',
+    cuentaInv: document.getElementById('p-cuenta-inv').value,
+    cuentaCosto: document.getElementById('p-cuenta-costo').value,
+  };
+  if (editingProductoId) obj.id = editingProductoId;
+  await put('productos', obj);
+  productos = await getAll('productos');
+  cerrarModal('modal-producto');
+  renderProductos();
+  poblarSelectoresInventario();
+}
+
+async function eliminarProducto(id) {
+  const tieneMovs = movInventario.some(m=>m.productoId===id);
+  if (tieneMovs && !confirm('Este producto tiene movimientos registrados. ¿Eliminar de todas formas?')) return;
+  if (!tieneMovs && !confirm('¿Eliminar este producto?')) return;
+  await del('productos', id);
+  productos = await getAll('productos');
+  renderProductos();
+}
+
+// ===== RENDER MOVIMIENTOS =====
+function poblarSelectoresInventario() {
+  const selMov = document.getElementById('filtro-mov-prod');
+  if (selMov) {
+    const cur = selMov.value;
+    selMov.innerHTML = '<option value="">Todos los productos</option>' +
+      productos.map(p=>`<option value="${p.id}" ${String(p.id)===cur?'selected':''}>${p.codigo} — ${p.nombre}</option>`).join('');
+  }
+  // Selector en resumen
+  const periodos = [...new Set(movInventario.map(m=>m.fecha.slice(0,7)))].sort().reverse();
+  const selRes = document.getElementById('filtro-resumen-inv-mes');
+  if (selRes) {
+    const cur = selRes.value;
+    selRes.innerHTML = '<option value="">Todo el inventario</option>' +
+      periodos.map(p=>`<option value="${p}" ${p===cur?'selected':''}>${MESES[parseInt(p.slice(5))]} ${p.slice(0,4)}</option>`).join('');
+  }
+  // Selector en modal movimiento
+  const selProd = document.getElementById('mv-producto');
+  if (selProd) {
+    selProd.innerHTML = '<option value="">Seleccionar producto...</option>' +
+      productos.map(p=>`<option value="${p.id}">${p.codigo} — ${p.nombre}</option>`).join('');
+  }
+}
+
+function renderMovInventario() {
+  poblarSelectoresInventario();
+  const filtroProd = document.getElementById('filtro-mov-prod')?.value;
+  const desde = document.getElementById('mov-desde')?.value;
+  const hasta = document.getElementById('mov-hasta')?.value;
+  let lista = [...movInventario]
+    .filter(m => (!filtroProd || String(m.productoId)===filtroProd) && (!desde||m.fecha>=desde) && (!hasta||m.fecha<=hasta))
+    .sort((a,b)=>b.fecha.localeCompare(a.fecha)||b.id-a.id);
+
+  if (!lista.length) {
+    document.getElementById('contenido-mov-inv').innerHTML=`<div class="empty-state"><div class="empty-icon">🔄</div><div class="empty-title">Sin movimientos</div><div class="empty-sub">Registra entradas y salidas de inventario</div></div>`;
+    return;
+  }
+  const $ = v => Math.round(v).toLocaleString('es-CL');
+  const tipoBadge = {entrada:'badge-entrada',salida:'badge-salida',ajuste:'badge-ajuste'};
+  const tipoLabel = {entrada:'Entrada',salida:'Salida',ajuste:'Ajuste'};
+
+  document.getElementById('contenido-mov-inv').innerHTML = `
+  <div class="table-wrap"><table>
+    <thead><tr><th>Fecha</th><th>Tipo</th><th>Producto</th><th class="text-right">Cantidad</th><th class="text-right">P. Unitario</th><th class="text-right">Total</th><th>Glosa</th><th></th></tr></thead>
+    <tbody>
+    ${lista.map(m=>{
+      const p = productos.find(x=>x.id===m.productoId);
+      const total = m.cantidad * m.precioUnitario;
+      return `<tr>
+        <td>${m.fecha}</td>
+        <td><span class="badge ${tipoBadge[m.tipo]||''}">${tipoLabel[m.tipo]||m.tipo}</span></td>
+        <td><div style="font-size:0.82rem;font-weight:600;">${p?p.nombre:'—'}</div><div style="font-size:0.72rem;color:var(--text3);">${p?p.codigo:''}</div></td>
+        <td class="text-right mono">${m.cantidad.toLocaleString('es-CL',{minimumFractionDigits:0,maximumFractionDigits:3})}</td>
+        <td class="text-right mono">$ ${$(m.precioUnitario)}</td>
+        <td class="text-right mono ${m.tipo==='salida'?'amount-neg':'amount-pos'}">$ ${$(total)}</td>
+        <td style="font-size:0.82rem;color:var(--text2);">${m.glosa||'—'}</td>
+        <td><button class="btn btn-danger" style="font-size:0.72rem;padding:3px 8px;" onclick="eliminarMovInventario(${m.id})">🗑️</button></td>
+      </tr>`;
+    }).join('')}
+    </tbody>
+  </table></div>`;
+}
+
+// ===== MODAL MOVIMIENTO =====
+let tipoMovActual = 'entrada';
+
+function abrirModalMovInv(tipo) {
+  tipoMovActual = tipo;
+  const titulos = {entrada:'📥 Entrada de Inventario', salida:'📤 Salida de Inventario', ajuste:'🔧 Ajuste de Inventario'};
+  document.getElementById('modal-mov-title').textContent = titulos[tipo];
+  poblarSelectoresInventario();
+  document.getElementById('mv-producto').value = '';
+  document.getElementById('mv-fecha').value = new Date().toISOString().slice(0,10);
+  document.getElementById('mv-cantidad').value = '';
+  document.getElementById('mv-precio').value = '';
+  document.getElementById('mv-total').value = '';
+  document.getElementById('mv-glosa').value = '';
+  document.getElementById('mv-info-prod').style.display = 'none';
+  // Ocultar precio en salida (se calcula por promedio)
+  document.getElementById('mv-precio-grupo').style.display = tipo==='salida' ? 'none' : '';
+  document.getElementById('modal-mov-inv').classList.add('open');
+}
+
+function mostrarInfoProducto() {
+  const id = parseInt(document.getElementById('mv-producto').value);
+  const p = productos.find(x=>x.id===id);
+  const info = document.getElementById('mv-info-prod');
+  if (!p) { info.style.display='none'; return; }
+  const stock = calcularStockProductos();
+  const s = stock[id] || {};
+  info.style.display = '';
+  info.innerHTML = `<strong>${p.nombre}</strong> &nbsp;·&nbsp; Stock actual: <strong>${(s.stock||0).toLocaleString('es-CL',{maximumFractionDigits:3})}</strong> ${p.unidad||'un'} &nbsp;·&nbsp; Costo promedio: <strong>$ ${Math.round(s.costoPromedio||0).toLocaleString('es-CL')}</strong>`;
+  calcularTotalMov();
+}
+
+function calcularTotalMov() {
+  const cant = parseFloat(document.getElementById('mv-cantidad').value)||0;
+  const precio = tipoMovActual === 'salida' ? (() => {
+    const id = parseInt(document.getElementById('mv-producto').value);
+    const stock = calcularStockProductos();
+    return (stock[id]||{}).costoPromedio||0;
+  })() : getMiles('mv-precio');
+  const total = cant * precio;
+  document.getElementById('mv-total').value = total > 0 ? '$ ' + Math.round(total).toLocaleString('es-CL') : '';
+}
+
+async function guardarMovInventario() {
+  const productoId = parseInt(document.getElementById('mv-producto').value);
+  const fecha = document.getElementById('mv-fecha').value;
+  const cantidad = parseFloat(document.getElementById('mv-cantidad').value)||0;
+  const glosa = document.getElementById('mv-glosa').value.trim();
+  if (!productoId || !fecha || !cantidad) { alert('Producto, fecha y cantidad son obligatorios'); return; }
+
+  let precioUnitario = 0;
+  if (tipoMovActual === 'salida') {
+    const stock = calcularStockProductos();
+    precioUnitario = (stock[productoId]||{}).costoPromedio||0;
+    if (stock[productoId]?.stock < cantidad) {
+      if (!confirm(`Stock disponible: ${(stock[productoId]?.stock||0).toFixed(3)}. La cantidad ingresada es mayor. ¿Continuar de todas formas?`)) return;
+    }
+  } else {
+    precioUnitario = getMiles('mv-precio');
+    if (!precioUnitario && tipoMovActual !== 'ajuste') { alert('Precio unitario es obligatorio'); return; }
+  }
+
+  const obj = { tipo: tipoMovActual, productoId, fecha, cantidad, precioUnitario, glosa };
+  await put('mov_inv', obj);
+  movInventario = await getAll('mov_inv');
+  cerrarModal('modal-mov-inv');
+  renderMovInventario();
+  renderProductos();
+  renderResumenInventario();
+}
+
+async function eliminarMovInventario(id) {
+  if (!confirm('¿Eliminar este movimiento? Esto recalculará el inventario.')) return;
+  await del('mov_inv', id);
+  movInventario = await getAll('mov_inv');
+  renderMovInventario();
+  renderProductos();
+  renderResumenInventario();
+}
+
+// ===== RESUMEN INVENTARIO =====
+function renderResumenInventario() {
+  poblarSelectoresInventario();
+  const filtroMes = document.getElementById('filtro-resumen-inv-mes')?.value;
+  const hasta = filtroMes ? filtroMes + '-31' : null;
+  const stock = calcularStockHasta(hasta);
+
+  // Calcular salidas del mes seleccionado
+  let movMes = movInventario;
+  if (filtroMes) {
+    movMes = movInventario.filter(m=>m.fecha.startsWith(filtroMes));
+  }
+  const salidasMes = {};
+  // Necesitamos el costo promedio ANTES del mes para valorizar salidas del mes
+  const stockAntesMes = filtroMes ? calcularStockHasta(filtroMes.slice(0,7)+'-01') : {};
+  let costoAcum = filtroMes ? Object.assign({}, ...Object.keys(stockAntesMes).map(id=>({[id]: (stockAntesMes[id]||{}).costoPromedio||0}))) : {};
+  // Recalcular costos de salidas del mes con promedio ponderado progresivo
+  const movMesOrden = [...movMes].sort((a,b)=>a.fecha.localeCompare(b.fecha)||a.id-b.id);
+  const stockTemp = {};
+  productos.forEach(p => {
+    const s = filtroMes ? (stockAntesMes[p.id]||{}) : {};
+    stockTemp[p.id] = { stock: s.stock||0, costoPromedio: s.costoPromedio||0, salidasMonto: 0, salidasQty: 0, entradasMonto: 0, entradasQty: 0 };
+  });
+  movMesOrden.forEach(m => {
+    if (!stockTemp[m.productoId]) return;
+    const r = stockTemp[m.productoId];
+    if (m.tipo === 'entrada') {
+      const ns = r.stock + m.cantidad;
+      r.costoPromedio = ns > 0 ? (r.stock * r.costoPromedio + m.cantidad * m.precioUnitario) / ns : 0;
+      r.stock = ns;
+      r.entradasQty += m.cantidad;
+      r.entradasMonto += m.cantidad * m.precioUnitario;
+    } else if (m.tipo === 'salida') {
+      r.salidasMonto += m.cantidad * r.costoPromedio;
+      r.salidasQty += m.cantidad;
+      r.stock = Math.max(0, r.stock - m.cantidad);
+    } else if (m.tipo === 'ajuste') {
+      r.stock = m.cantidad;
+      r.costoPromedio = m.precioUnitario;
+    }
+  });
+
+  const totalStockValor = productos.reduce((s,p)=>s+(stock[p.id]?.stock||0)*(stock[p.id]?.costoPromedio||0),0);
+  const totalSalidas = Object.values(stockTemp).reduce((s,r)=>s+r.salidasMonto,0);
+  const totalEntradas = Object.values(stockTemp).reduce((s,r)=>s+r.entradasMonto,0);
+  const periodoLabel = filtroMes ? `${MESES[parseInt(filtroMes.slice(5))]} ${filtroMes.slice(0,4)}` : 'Acumulado total';
+  const $ = v => Math.round(v).toLocaleString('es-CL');
+
+  document.getElementById('contenido-resumen-inv').innerHTML = `
+  ${empresaHeaderHTML('Inventario Valorizado', periodoLabel)}
+  <div class="inv-stats" style="margin-top:1rem;">
+    <div class="inv-stat-card"><div class="inv-stat-label">Productos activos</div><div class="inv-stat-val">${productos.length}</div></div>
+    <div class="inv-stat-card"><div class="inv-stat-label">Stock total valorizado</div><div class="inv-stat-val" style="color:var(--green)">$ ${$(totalStockValor)}</div></div>
+    <div class="inv-stat-card"><div class="inv-stat-label">Entradas del período</div><div class="inv-stat-val" style="color:var(--blue)">$ ${$(totalEntradas)}</div></div>
+    <div class="inv-stat-card"><div class="inv-stat-label">Costo salidas período</div><div class="inv-stat-val" style="color:var(--red)">$ ${$(totalSalidas)}</div></div>
+  </div>
+  <div class="table-wrap"><table>
+    <thead><tr>
+      <th>Código</th><th>Producto</th><th>Unidad</th>
+      <th class="text-right">Entradas Qty</th><th class="text-right">$ Entradas</th>
+      <th class="text-right">Salidas Qty</th><th class="text-right">$ Costo Salidas</th>
+      <th class="text-right">Stock Final</th><th class="text-right">Costo Prom.</th><th class="text-right">Valor Stock</th>
+    </tr></thead>
+    <tbody>
+    ${productos.sort((a,b)=>a.codigo.localeCompare(b.codigo)).map(p=>{
+      const s = stock[p.id]||{};
+      const t = stockTemp[p.id]||{};
+      const valorStock = (s.stock||0)*(s.costoPromedio||0);
+      return `<tr>
+        <td class="mono" style="color:var(--accent)">${p.codigo}</td>
+        <td style="font-weight:600;">${p.nombre}</td>
+        <td>${p.unidad||'un'}</td>
+        <td class="text-right mono">${(t.entradasQty||0).toLocaleString('es-CL',{maximumFractionDigits:3})}</td>
+        <td class="text-right mono">$ ${$(t.entradasMonto||0)}</td>
+        <td class="text-right mono">${(t.salidasQty||0).toLocaleString('es-CL',{maximumFractionDigits:3})}</td>
+        <td class="text-right mono" style="color:var(--red)">$ ${$(t.salidasMonto||0)}</td>
+        <td class="text-right mono ${(s.stock||0)<=0?'amount-neg':''}">${(s.stock||0).toLocaleString('es-CL',{maximumFractionDigits:3})}</td>
+        <td class="text-right mono">$ ${$(s.costoPromedio||0)}</td>
+        <td class="text-right mono" style="font-weight:700;color:var(--green)">$ ${$(valorStock)}</td>
+      </tr>`;
+    }).join('')}
+    </tbody>
+    <tfoot><tr style="background:var(--bg3);font-weight:700;">
+      <td colspan="4">TOTALES</td>
+      <td class="text-right mono">$ ${$(totalEntradas)}</td>
+      <td></td>
+      <td class="text-right mono" style="color:var(--red)">$ ${$(totalSalidas)}</td>
+      <td colspan="2"></td>
+      <td class="text-right mono" style="color:var(--green)">$ ${$(totalStockValor)}</td>
+    </tr></tfoot>
+  </table></div>`;
+}
+
+// ===== CENTRALIZAR COSTO DE SALIDAS =====
+async function centralizarInventario() {
+  const filtroMes = document.getElementById('filtro-resumen-inv-mes')?.value;
+  if (!filtroMes) { alert('Selecciona un período específico para centralizar'); return; }
+  const periodoLabel = `${MESES[parseInt(filtroMes.slice(5))]} ${filtroMes.slice(0,4)}`;
+
+  // Calcular salidas del mes por producto
+  const stockAntes = calcularStockHasta(filtroMes + '-01');
+  const movMesOrden = movInventario.filter(m=>m.fecha.startsWith(filtroMes)).sort((a,b)=>a.fecha.localeCompare(b.fecha)||a.id-b.id);
+  const salidasPorProducto = {};
+  const stockTemp2 = {};
+  productos.forEach(p => {
+    const s = stockAntes[p.id]||{};
+    stockTemp2[p.id] = { stock: s.stock||0, costoPromedio: s.costoPromedio||0, salidasMonto: 0 };
+  });
+  movMesOrden.forEach(m => {
+    if (!stockTemp2[m.productoId]) return;
+    const r = stockTemp2[m.productoId];
+    if (m.tipo === 'entrada') {
+      const ns = r.stock + m.cantidad;
+      r.costoPromedio = ns>0 ? (r.stock*r.costoPromedio + m.cantidad*m.precioUnitario)/ns : 0;
+      r.stock = ns;
+    } else if (m.tipo === 'salida') {
+      r.salidasMonto += m.cantidad * r.costoPromedio;
+      r.stock = Math.max(0, r.stock - m.cantidad);
+    } else if (m.tipo === 'ajuste') {
+      r.stock = m.cantidad; r.costoPromedio = m.precioUnitario;
+    }
+    if (m.tipo === 'salida') {
+      const p = productos.find(x=>x.id===m.productoId);
+      if (!salidasPorProducto[m.productoId]) salidasPorProducto[m.productoId] = {nombre: p?.nombre||'', cuentaInv: p?.cuentaInv||'1-02-003-0001', cuentaCosto: p?.cuentaCosto||'5-01-001-0001', monto: 0};
+      salidasPorProducto[m.productoId].monto += m.cantidad * stockTemp2[m.productoId].costoPromedio;
+    }
+  });
+
+  const salidas = Object.values(salidasPorProducto).filter(s=>s.monto>0);
+  if (!salidas.length) { alert('No hay salidas de inventario en este período'); return; }
+
+  const totalSalidas = salidas.reduce((s,x)=>s+x.monto,0);
+  const refCentral = `INV-${filtroMes}`;
+  const yaExiste = asientos.find(a=>a.referencia===refCentral);
+  if (yaExiste) {
+    if (!confirm(`Ya existe centralización de inventario para ${periodoLabel}. ¿Reemplazar?`)) return;
+    await del('asientos', yaExiste.id); asientos = await getAll('asientos');
+  }
+  if (!confirm(`¿Centralizar costo de salidas de inventario ${periodoLabel} en contabilidad?\n\nCosto total: $ ${Math.round(totalSalidas).toLocaleString('es-CL')}`)) return;
+
+  const fecha = `${filtroMes}-01`;
+  // Generar líneas del asiento: Costo Ventas (Débito) vs Existencias (Crédito) por producto
+  const lineas = [];
+  salidas.forEach(s => {
+    lineas.push({cuenta: s.cuentaCosto, debito: Math.round(s.monto), credito: 0});
+    lineas.push({cuenta: s.cuentaInv,   debito: 0, credito: Math.round(s.monto)});
+  });
+  await put('asientos', {fecha, glosa:`Costo Salidas Inventario ${periodoLabel}`, referencia: refCentral, lineas});
+  asientos = await getAll('asientos');
+  renderAll();
+  alert(`✓ Centralización completada. Asiento registrado en Libro Diario.`);
+}
+
+// ===== EXPORTAR INVENTARIO PDF =====
+function exportarInventarioPDF() {
+  const filtroMes = document.getElementById('filtro-resumen-inv-mes')?.value;
+  const hasta = filtroMes ? filtroMes + '-31' : null;
+  const stock = calcularStockHasta(hasta);
+  const periodoLabel = filtroMes ? `${MESES[parseInt(filtroMes.slice(5))]} ${filtroMes.slice(0,4)}` : 'Acumulado total';
+  const $ = v => '$ ' + Math.round(v).toLocaleString('es-CL');
+  const totalVal = productos.reduce((s,p)=>s+(stock[p.id]?.stock||0)*(stock[p.id]?.costoPromedio||0),0);
+  const win = window.open('','_blank');
+  const rows = productos.sort((a,b)=>a.codigo.localeCompare(b.codigo)).map(p=>{
+    const s = stock[p.id]||{};
+    return `<tr><td>${p.codigo}</td><td>${p.nombre}</td><td>${p.unidad||'un'}</td>
+      <td class="n">${(s.stock||0).toLocaleString('es-CL',{maximumFractionDigits:3})}</td>
+      <td class="n">${$(s.costoPromedio||0)}</td>
+      <td class="n tot">${$((s.stock||0)*(s.costoPromedio||0))}</td></tr>`;
+  }).join('');
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Inventario</title>
+  <style>body{font-family:Arial,sans-serif;font-size:10px;margin:20px;}table{width:100%;border-collapse:collapse;}th,td{border:1px solid #ccc;padding:3px 6px;}th{background:#f0f0f0;}td.n{text-align:right;font-family:monospace;}.tot{font-weight:700;}tr.tf td{background:#f5f5f5;font-weight:700;}</style>
+  </head><body>${empresaPrintHeader('Inventario Valorizado', periodoLabel)}
+  <table><thead><tr><th>Código</th><th>Producto</th><th>Unidad</th><th>Stock</th><th>Costo Prom.</th><th>Valor Total</th></tr></thead>
+  <tbody>${rows}</tbody>
+  <tfoot><tr class="tf"><td colspan="5" style="text-align:right;">TOTAL VALORIZADO</td><td class="n tot">${$(totalVal)}</td></tr></tfoot>
+  </table></body></html>`);
+  win.document.close(); setTimeout(()=>win.print(),400);
+}
+
+// ===== EXPORTAR INVENTARIO EXCEL =====
+function exportarInventarioExcel() {
+  const filtroMes = document.getElementById('filtro-resumen-inv-mes')?.value;
+  const hasta = filtroMes ? filtroMes + '-31' : null;
+  const stock = calcularStockHasta(hasta);
+  const periodoLabel = filtroMes ? `${MESES[parseInt(filtroMes.slice(5))]} ${filtroMes.slice(0,4)}` : 'Acumulado';
+  let xml = `<?xml version="1.0" encoding="UTF-8"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+  <Styles><Style ss:ID="h"><Font ss:Bold="1" ss:Size="11"/></Style><Style ss:ID="t"><Font ss:Bold="1"/><Interior ss:Color="#F0F0F0" ss:Pattern="Solid"/></Style><Style ss:ID="f"><Font ss:Bold="1"/><Interior ss:Color="#F5F5F5" ss:Pattern="Solid"/><Alignment ss:Horizontal="Right"/><NumberFormat ss:Format="#,##0"/></Style><Style ss:ID="n"><Alignment ss:Horizontal="Right"/><NumberFormat ss:Format="#,##0"/></Style><Style ss:ID="g"><Alignment ss:Horizontal="Right"/><NumberFormat ss:Format="#,##0"/><Font ss:Color="#1a6b30" ss:Bold="1"/></Style></Styles>
+  <Worksheet ss:Name="Inventario"><Table>
+  <Row><Cell ss:MergeAcross="5" ss:StyleID="h"><Data ss:Type="String">${empresa.nombre||''} — Inventario Valorizado ${periodoLabel}</Data></Cell></Row>
+  <Row><Cell ss:MergeAcross="5"><Data ss:Type="String">${empresa.rut?'RUT: '+empresa.rut:''}</Data></Cell></Row><Row/>
+  <Row><Cell ss:StyleID="t"><Data ss:Type="String">Codigo</Data></Cell><Cell ss:StyleID="t"><Data ss:Type="String">Producto</Data></Cell><Cell ss:StyleID="t"><Data ss:Type="String">Unidad</Data></Cell><Cell ss:StyleID="t"><Data ss:Type="String">Stock</Data></Cell><Cell ss:StyleID="t"><Data ss:Type="String">Costo Promedio</Data></Cell><Cell ss:StyleID="t"><Data ss:Type="String">Valor Total</Data></Cell></Row>`;
+  let total = 0;
+  productos.sort((a,b)=>a.codigo.localeCompare(b.codigo)).forEach(p=>{
+    const s = stock[p.id]||{};
+    const val = (s.stock||0)*(s.costoPromedio||0);
+    total += val;
+    xml+=`<Row><Cell><Data ss:Type="String">${p.codigo}</Data></Cell><Cell><Data ss:Type="String">${p.nombre}</Data></Cell><Cell><Data ss:Type="String">${p.unidad||'un'}</Data></Cell><Cell ss:StyleID="n"><Data ss:Type="Number">${s.stock||0}</Data></Cell><Cell ss:StyleID="n"><Data ss:Type="Number">${Math.round(s.costoPromedio||0)}</Data></Cell><Cell ss:StyleID="n"><Data ss:Type="Number">${Math.round(val)}</Data></Cell></Row>`;
+  });
+  xml+=`<Row><Cell ss:MergeAcross="4" ss:StyleID="f"><Data ss:Type="String">TOTAL VALORIZADO</Data></Cell><Cell ss:StyleID="g"><Data ss:Type="Number">${Math.round(total)}</Data></Cell></Row>`;
+  xml+=`</Table></Worksheet></Workbook>`;
+  const blob=new Blob([xml],{type:'application/vnd.ms-excel'});
+  const a2=document.createElement('a'); a2.href=URL.createObjectURL(blob);
+  a2.download=`Inventario_${filtroMes||'total'}.xls`; a2.click();
+}
+
+
+// =========================================================
+// ===== MÓDULO AUXILIARES (CLIENTES / PROVEEDORES) ========
+// =========================================================
+
+// Cuentas contables típicas de auxiliares
+const CTAS_AUXILIARES_DEFAULT = ['1-02-001-0001','1-02-001-0002','2-01-001-0001','2-01-001-0002'];
+
+function poblarSelectAuxiliar() {
+  // Actualizar selectores de auxiliar en el modal de asientos (al abrir)
+  document.querySelectorAll('.linea-aux-selector').forEach(sel => {
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">— Sin auxiliar —</option>' +
+      auxiliares.map(a=>`<option value="${a.id}" ${String(a.id)===cur?'selected':''}>[${a.rut}] ${a.nombre}</option>`).join('');
+  });
+  // Selector en mayor auxiliar
+  const selMayorAux = document.getElementById('filtro-aux-mayor-rut');
+  if (selMayorAux) {
+    const cur = selMayorAux.value;
+    selMayorAux.innerHTML = '<option value="">— Seleccionar auxiliar —</option>' +
+      auxiliares.map(a=>`<option value="${a.id}" ${String(a.id)===cur?'selected':''}>[${a.rut}] ${a.nombre} (${a.tipo})</option>`).join('');
+  }
+}
+
+// ===== RENDER REGISTRO AUXILIARES =====
+function renderAuxiliares() {
+  poblarSelectAuxiliar();
+  const filtro = (document.getElementById('filtro-aux')?.value||'').toLowerCase();
+  const filtroTipo = document.getElementById('filtro-aux-tipo')?.value||'';
+  const saldos = calcularSaldosAuxiliares();
+
+  let lista = auxiliares
+    .filter(a => (!filtroTipo || a.tipo===filtroTipo) &&
+      (!filtro || a.nombre.toLowerCase().includes(filtro) || (a.rut||'').includes(filtro)))
+    .sort((a,b)=>a.nombre.localeCompare(b.nombre));
+
+  if (!lista.length) {
+    document.getElementById('contenido-auxiliares').innerHTML = `<div class="empty-state"><div class="empty-icon">🏷️</div><div class="empty-title">Sin auxiliares registrados</div><div class="empty-sub">Registra clientes y proveedores para asociarlos a los asientos</div></div>`;
+    return;
+  }
+
+  const tipoBadge = {cliente:'aux-tipo-badge-cliente', proveedor:'aux-tipo-badge-proveedor', ambos:'badge'};
+  const tipoLabel = {cliente:'Cliente', proveedor:'Proveedor', ambos:'Ambos'};
+
+  document.getElementById('contenido-auxiliares').innerHTML = `
+  <div class="table-wrap"><table>
+    <thead><tr><th>Tipo</th><th>RUT</th><th>Nombre / Razón Social</th><th>Giro</th><th>Cuenta Contable</th><th class="text-right">Saldo</th><th>Acciones</th></tr></thead>
+    <tbody>
+    ${lista.map(a => {
+      const s = saldos[a.id] || 0;
+      const cta = cuentas.find(c=>c.codigo===a.cuenta);
+      return `<tr>
+        <td><span class="badge ${tipoBadge[a.tipo]||'badge'}">${tipoLabel[a.tipo]||a.tipo}</span></td>
+        <td class="mono" style="color:var(--accent);font-size:0.82rem;">${a.rut||'—'}</td>
+        <td style="font-weight:600;">${a.nombre}</td>
+        <td style="font-size:0.82rem;color:var(--text2);">${a.giro||'—'}</td>
+        <td style="font-size:0.78rem;">${cta?`<span class="tag-cuenta" style="font-size:0.7rem;">${cta.codigo}</span> ${cta.nombre}`:a.cuenta||'—'}</td>
+        <td class="text-right mono ${s>0?'aux-saldo-positivo':s<0?'aux-saldo-negativo':''}">${s!==0?fmt(Math.abs(s)):'—'}</td>
+        <td><div style="display:flex;gap:4px;">
+          <button class="btn" style="font-size:0.72rem;padding:3px 8px;" onclick="abrirModalAuxiliar(${a.id})">✏️</button>
+          <button class="btn btn-danger" style="font-size:0.72rem;padding:3px 8px;" onclick="eliminarAuxiliar(${a.id})">🗑️</button>
+        </div></td>
+      </tr>`;
+    }).join('')}
+    </tbody>
+  </table></div>`;
+}
+
+// ===== MODAL AUXILIAR =====
+function abrirModalAuxiliar(id=null) {
+  editingAuxiliarId = id;
+  const a = id ? auxiliares.find(x=>x.id===id) : {};
+  document.getElementById('modal-aux-title').textContent = id ? 'Editar Auxiliar' : 'Nuevo Cliente / Proveedor';
+  document.getElementById('aux-tipo').value = a.tipo||'cliente';
+  document.getElementById('aux-rut').value = a.rut||'';
+  document.getElementById('aux-nombre').value = a.nombre||'';
+  document.getElementById('aux-giro').value = a.giro||'';
+  document.getElementById('aux-direccion').value = a.direccion||'';
+  document.getElementById('aux-telefono').value = a.telefono||'';
+  document.getElementById('aux-email').value = a.email||'';
+  document.getElementById('aux-notas').value = a.notas||'';
+  // Poblar cuentas
+  const ctasAux = cuentas.filter(c=>
+    c.tipo==='Activo' || c.tipo==='Pasivo'
+  ).sort((a,b)=>a.codigo.localeCompare(b.codigo));
+  document.getElementById('aux-cuenta').innerHTML = '<option value="">— Sin cuenta específica —</option>' +
+    ctasAux.map(c=>`<option value="${c.codigo}" ${a.cuenta===c.codigo?'selected':''}>${c.codigo} — ${c.nombre}</option>`).join('');
+  if (!a.cuenta) {
+    // Pre-seleccionar según tipo
+    const tipo = document.getElementById('aux-tipo').value;
+    const defCta = tipo==='proveedor' ? '2-01-001-0001' : '1-02-001-0001';
+    document.getElementById('aux-cuenta').value = defCta;
+  }
+  document.getElementById('modal-auxiliar').classList.add('open');
+}
+
+async function guardarAuxiliar() {
+  const nombre = document.getElementById('aux-nombre').value.trim();
+  const rut = document.getElementById('aux-rut').value.trim();
+  if (!nombre || !rut) { alert('Nombre y RUT son obligatorios'); return; }
+  // Verificar RUT duplicado
+  const dup = auxiliares.find(a => a.rut === rut && a.id !== editingAuxiliarId);
+  if (dup) { alert(`Ya existe un auxiliar con RUT ${rut}: ${dup.nombre}`); return; }
+  const obj = {
+    tipo: document.getElementById('aux-tipo').value,
+    rut, nombre,
+    cuenta: document.getElementById('aux-cuenta').value||'',
+    giro: document.getElementById('aux-giro').value.trim(),
+    direccion: document.getElementById('aux-direccion').value.trim(),
+    telefono: document.getElementById('aux-telefono').value.trim(),
+    email: document.getElementById('aux-email').value.trim(),
+    notas: document.getElementById('aux-notas').value.trim(),
+  };
+  if (editingAuxiliarId) obj.id = editingAuxiliarId;
+  await put('auxiliares', obj);
+  auxiliares = await getAll('auxiliares');
+  cerrarModal('modal-auxiliar');
+  renderAuxiliares();
+  poblarSelectAuxiliar();
+  populateMayorSelect();
+}
+
+async function eliminarAuxiliar(id) {
+  const tieneMovs = asientos.some(a=>a.lineas.some(l=>l.auxiliarId===id));
+  if (tieneMovs && !confirm('Este auxiliar tiene movimientos en asientos. ¿Eliminar de todas formas?')) return;
+  if (!tieneMovs && !confirm('¿Eliminar este auxiliar?')) return;
+  await del('auxiliares', id);
+  auxiliares = await getAll('auxiliares');
+  renderAuxiliares();
+  poblarSelectAuxiliar();
+}
+
+// ===== CALCULAR SALDOS AUXILIARES =====
+function calcularSaldosAuxiliares(fechaHasta=null) {
+  // Para cada auxiliar, suma débitos y créditos en sus líneas
+  const saldos = {};
+  auxiliares.forEach(a => { saldos[a.id] = 0; });
+
+  asientos
+    .filter(a => !fechaHasta || a.fecha <= fechaHasta)
+    .forEach(asiento => {
+      asiento.lineas.forEach(l => {
+        if (!l.auxiliarId) return;
+        const aux = auxiliares.find(a=>a.id===l.auxiliarId);
+        if (!aux) return;
+        const cuenta = cuentas.find(c=>c.codigo===l.cuenta);
+        if (!cuenta) return;
+        // Saldo según naturaleza de la cuenta
+        const dif = cuenta.naturaleza==='Deudora'
+          ? (l.debito||0) - (l.credito||0)
+          : (l.credito||0) - (l.debito||0);
+        saldos[aux.id] = (saldos[aux.id]||0) + dif;
+      });
+    });
+  return saldos;
+}
+
+// ===== MAYOR AUXILIAR =====
+function renderMayorAuxiliar() {
+  poblarSelectAuxiliar();
+  const auxId = parseInt(document.getElementById('filtro-aux-mayor-rut')?.value||'0');
+  const desde = document.getElementById('aux-mayor-desde')?.value||'';
+  const hasta = document.getElementById('aux-mayor-hasta')?.value||'';
+  const cont = document.getElementById('contenido-mayor-aux');
+
+  if (!auxId) {
+    cont.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">Selecciona un auxiliar</div><div class="empty-sub">Elige un cliente o proveedor del selector superior</div></div>`;
+    return;
+  }
+  const aux = auxiliares.find(a=>a.id===auxId);
+  if (!aux) { cont.innerHTML = ''; return; }
+
+  const movsFiltrados = asientos
+    .filter(a => (!desde||a.fecha>=desde) && (!hasta||a.fecha<=hasta) && a.lineas.some(l=>l.auxiliarId===auxId))
+    .sort((a,b)=>a.fecha.localeCompare(b.fecha)||a.id-b.id);
+
+  if (!movsFiltrados.length) {
+    cont.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">Sin movimientos para ${aux.nombre}</div></div>`;
+    return;
+  }
+
+  let saldoAcum = 0;
+  let rowsHtml = '';
+  movsFiltrados.forEach(asiento => {
+    asiento.lineas.filter(l=>l.auxiliarId===auxId).forEach(l => {
+      const cuenta = cuentas.find(c=>c.codigo===l.cuenta);
+      if (!cuenta) return;
+      const dif = cuenta.naturaleza==='Deudora'
+        ? (l.debito||0) - (l.credito||0)
+        : (l.credito||0) - (l.debito||0);
+      saldoAcum += dif;
+      rowsHtml += `<tr>
+        <td class="mono" style="color:var(--text3)">#${String(asiento.id).padStart(4,'0')}</td>
+        <td>${asiento.fecha}</td>
+        <td style="font-size:0.84rem;">${asiento.glosa}</td>
+        <td style="font-size:0.78rem;"><span class="tag-cuenta" style="font-size:0.7rem;">${l.cuenta}</span> ${cuenta.nombre}</td>
+        <td class="text-right">${l.debito>0?`<span class="amount-pos">${fmt(l.debito)}</span>`:'—'}</td>
+        <td class="text-right">${l.credito>0?`<span class="amount-neg">${fmt(l.credito)}</span>`:'—'}</td>
+        <td class="text-right mono ${saldoAcum>=0?'aux-saldo-positivo':'aux-saldo-negativo'}">${fmt(saldoAcum)}</td>
+      </tr>`;
+    });
+  });
+
+  const tipoBadge = {cliente:'aux-tipo-badge-cliente', proveedor:'aux-tipo-badge-proveedor', ambos:'badge'};
+  const tipoLabel = {cliente:'Cliente', proveedor:'Proveedor', ambos:'Ambos'};
+  const cta = cuentas.find(c=>c.codigo===aux.cuenta);
+
+  cont.innerHTML = `
+  <div class="mayor-card" style="margin-bottom:1rem;">
+    <div class="mayor-card-header">
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <div class="mayor-card-title">${aux.nombre}</div>
+          <span class="badge ${tipoBadge[aux.tipo]||'badge'}">${tipoLabel[aux.tipo]||aux.tipo}</span>
+        </div>
+        <div style="font-size:0.78rem;color:var(--text3);margin-top:3px;">
+          RUT: <strong>${aux.rut}</strong>
+          ${aux.giro ? ` · ${aux.giro}` : ''}
+          ${cta ? ` · Cuenta: ${cta.codigo} — ${cta.nombre}` : ''}
+        </div>
+      </div>
+      <div class="saldo-label">Saldo: <span class="${saldoAcum>=0?'aux-saldo-positivo':'aux-saldo-negativo'}">${fmt(Math.abs(saldoAcum))}</span></div>
+    </div>
+    <table>
+      <thead><tr><th>N°</th><th>Fecha</th><th>Descripción</th><th>Cuenta</th><th class="text-right">Débito</th><th class="text-right">Crédito</th><th class="text-right">Saldo</th></tr></thead>
+      <tbody>${rowsHtml}</tbody>
+    </table>
+  </div>`;
+}
+
+// ===== ANTIGÜEDAD DE SALDOS =====
+function renderAntiguedad() {
+  const filtroTipo = document.getElementById('filtro-antig-tipo')?.value||'';
+  const fechaCorteStr = document.getElementById('antig-fecha-corte')?.value || new Date().toISOString().slice(0,10);
+  const fechaCorte = new Date(fechaCorteStr + 'T00:00:00');
+  const cont = document.getElementById('contenido-antiguedad');
+
+  // Inicializar fecha corte si no tiene valor
+  if (!document.getElementById('antig-fecha-corte')?.value) {
+    document.getElementById('antig-fecha-corte').value = fechaCorteStr;
+  }
+
+  let auxFiltrados = auxiliares.filter(a => !filtroTipo || a.tipo===filtroTipo || a.tipo==='ambos');
+  if (!auxFiltrados.length) {
+    cont.innerHTML = `<div class="empty-state"><div class="empty-icon">⏱️</div><div class="empty-title">Sin auxiliares</div></div>`;
+    return;
+  }
+
+  // Para cada auxiliar, obtener sus movimientos y clasificar por antigüedad
+  const filas = [];
+  let totSaldo=0, tot0_30=0, tot31_60=0, tot61_90=0, totMas90=0;
+
+  auxFiltrados.forEach(aux => {
+    // Obtener todos los movimientos del auxiliar hasta la fecha de corte
+    const movsAux = [];
+    asientos
+      .filter(a => a.fecha <= fechaCorteStr)
+      .sort((a,b)=>a.fecha.localeCompare(b.fecha))
+      .forEach(asiento => {
+        asiento.lineas.filter(l=>l.auxiliarId===aux.id).forEach(l => {
+          const cuenta = cuentas.find(c=>c.codigo===l.cuenta);
+          if (!cuenta) return;
+          const dif = cuenta.naturaleza==='Deudora'
+            ? (l.debito||0) - (l.credito||0)
+            : (l.credito||0) - (l.debito||0);
+          if (dif !== 0) movsAux.push({ fecha: asiento.fecha, monto: dif, glosa: asiento.glosa, nAsiento: asiento.id });
+        });
+      });
+
+    if (!movsAux.length) return;
+    const saldo = movsAux.reduce((s,m)=>s+m.monto, 0);
+    if (Math.abs(saldo) < 1) return; // Saldo cero, no mostrar
+
+    // Clasificar por antigüedad del último movimiento pendiente
+    // Usamos el último asiento para determinar antigüedad
+    const ultimaFecha = movsAux[movsAux.length-1].fecha;
+    const diasDeuda = Math.floor((fechaCorte - new Date(ultimaFecha + 'T00:00:00')) / (1000*60*60*24));
+
+    let tramo = '';
+    if (diasDeuda <= 30) { tramo='0-30'; tot0_30+=saldo; }
+    else if (diasDeuda <= 60) { tramo='31-60'; tot31_60+=saldo; }
+    else if (diasDeuda <= 90) { tramo='61-90'; tot61_90+=saldo; }
+    else { tramo='+90'; totMas90+=saldo; }
+    totSaldo += saldo;
+
+    filas.push({ aux, saldo, diasDeuda, tramo, ultimaFecha });
+  });
+
+  if (!filas.length) {
+    cont.innerHTML = `<div class="empty-state"><div class="empty-icon">✅</div><div class="empty-title">Sin saldos pendientes</div><div class="empty-sub">Todos los auxiliares tienen saldo cero al ${fechaCorteStr}</div></div>`;
+    return;
+  }
+
+  filas.sort((a,b)=>b.diasDeuda-a.diasDeuda);
+  const tipoBadge = {cliente:'aux-tipo-badge-cliente',proveedor:'aux-tipo-badge-proveedor',ambos:'badge'};
+  const tipoLabel = {cliente:'Cliente',proveedor:'Proveedor',ambos:'Ambos'};
+  const tramoBadge = {'0-30':'badge-entrada','31-60':'badge-ajuste','61-90':'badge badge-yellow','\\+90':'badge-salida'};
+
+  cont.innerHTML = `
+  <div class="antig-bar">
+    <div class="antig-card">
+      <div class="antig-card-label">0 – 30 días</div>
+      <div class="antig-card-val" style="color:var(--green)">${fmt(Math.abs(tot0_30))}</div>
+      <div class="antig-card-count">${filas.filter(f=>f.tramo==='0-30').length} auxiliar(es)</div>
+    </div>
+    <div class="antig-card">
+      <div class="antig-card-label">31 – 60 días</div>
+      <div class="antig-card-val" style="color:var(--yellow)">${fmt(Math.abs(tot31_60))}</div>
+      <div class="antig-card-count">${filas.filter(f=>f.tramo==='31-60').length} auxiliar(es)</div>
+    </div>
+    <div class="antig-card">
+      <div class="antig-card-label">61 – 90 días</div>
+      <div class="antig-card-val" style="color:var(--accent)">${fmt(Math.abs(tot61_90))}</div>
+      <div class="antig-card-count">${filas.filter(f=>f.tramo==='61-90').length} auxiliar(es)</div>
+    </div>
+    <div class="antig-card">
+      <div class="antig-card-label">Más de 90 días</div>
+      <div class="antig-card-val" style="color:var(--red)">${fmt(Math.abs(totMas90))}</div>
+      <div class="antig-card-count">${filas.filter(f=>f.tramo==='+90').length} auxiliar(es)</div>
+    </div>
+  </div>
+  <div class="table-wrap"><table>
+    <thead><tr>
+      <th>Tipo</th><th>RUT</th><th>Nombre</th>
+      <th class="text-right">0–30 días</th>
+      <th class="text-right">31–60 días</th>
+      <th class="text-right">61–90 días</th>
+      <th class="text-right">+90 días</th>
+      <th class="text-right">Saldo Total</th>
+      <th>Últ. Movimiento</th>
+    </tr></thead>
+    <tbody>
+    ${filas.map(f=>`<tr>
+      <td><span class="badge ${tipoBadge[f.aux.tipo]||'badge'}">${tipoLabel[f.aux.tipo]||f.aux.tipo}</span></td>
+      <td class="mono" style="font-size:0.8rem;color:var(--accent)">${f.aux.rut}</td>
+      <td style="font-weight:600;font-size:0.87rem;">${f.aux.nombre}</td>
+      <td class="text-right mono">${f.tramo==='0-30'?fmt(Math.abs(f.saldo)):'—'}</td>
+      <td class="text-right mono">${f.tramo==='31-60'?`<span style="color:var(--yellow)">${fmt(Math.abs(f.saldo))}</span>`:'—'}</td>
+      <td class="text-right mono">${f.tramo==='61-90'?`<span style="color:var(--accent)">${fmt(Math.abs(f.saldo))}</span>`:'—'}</td>
+      <td class="text-right mono">${f.tramo==='+90'?`<span style="color:var(--red)">${fmt(Math.abs(f.saldo))}</span>`:'—'}</td>
+      <td class="text-right mono" style="font-weight:700;">${fmt(Math.abs(f.saldo))}</td>
+      <td style="font-size:0.8rem;color:var(--text3);">${f.ultimaFecha} <span style="color:${f.diasDeuda>90?'var(--red)':f.diasDeuda>60?'var(--accent)':f.diasDeuda>30?'var(--yellow)':'var(--green)'};">(${f.diasDeuda} días)</span></td>
+    </tr>`).join('')}
+    </tbody>
+    <tfoot><tr style="background:var(--bg3);font-weight:700;">
+      <td colspan="3">TOTALES</td>
+      <td class="text-right mono" style="color:var(--green)">${fmt(Math.abs(tot0_30))}</td>
+      <td class="text-right mono" style="color:var(--yellow)">${fmt(Math.abs(tot31_60))}</td>
+      <td class="text-right mono" style="color:var(--accent)">${fmt(Math.abs(tot61_90))}</td>
+      <td class="text-right mono" style="color:var(--red)">${fmt(Math.abs(totMas90))}</td>
+      <td class="text-right mono">${fmt(Math.abs(totSaldo))}</td>
+      <td></td>
+    </tr></tfoot>
+  </table></div>`;
+}
+
+// ===== EXPORTAR MAYOR AUXILIAR PDF =====
+function exportarMayorAuxPDF() {
+  const auxId = parseInt(document.getElementById('filtro-aux-mayor-rut')?.value||'0');
+  if (!auxId) { alert('Selecciona un auxiliar primero'); return; }
+  const aux = auxiliares.find(a=>a.id===auxId);
+  const desde = document.getElementById('aux-mayor-desde')?.value||'';
+  const hasta = document.getElementById('aux-mayor-hasta')?.value||'';
+  const label = getRangeLabel(desde, hasta);
+  let saldoAcum = 0;
+  let rows = '';
+  asientos.filter(a=>(!desde||a.fecha>=desde)&&(!hasta||a.fecha<=hasta)&&a.lineas.some(l=>l.auxiliarId===auxId))
+    .sort((a,b)=>a.fecha.localeCompare(b.fecha))
+    .forEach(asiento=>{
+      asiento.lineas.filter(l=>l.auxiliarId===auxId).forEach(l=>{
+        const cuenta=cuentas.find(c=>c.codigo===l.cuenta);
+        if(!cuenta)return;
+        const dif=cuenta.naturaleza==='Deudora'?(l.debito||0)-(l.credito||0):(l.credito||0)-(l.debito||0);
+        saldoAcum+=dif;
+        rows+=`<tr><td>#${String(asiento.id).padStart(4,'0')}</td><td>${asiento.fecha}</td><td>${asiento.glosa}</td><td>${l.cuenta} ${cuenta.nombre}</td><td class="n">${l.debito>0?'$ '+l.debito.toLocaleString('es-CL'):''}</td><td class="n">${l.credito>0?'$ '+l.credito.toLocaleString('es-CL'):''}</td><td class="n tot">${saldoAcum.toLocaleString('es-CL')}</td></tr>`;
+      });
+    });
+  const win=window.open('','_blank');
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Mayor Auxiliar</title><style>body{font-family:Arial,sans-serif;font-size:10px;margin:20px;}table{width:100%;border-collapse:collapse;}th,td{border:1px solid #ccc;padding:3px 6px;}th{background:#f0f0f0;}td.n{text-align:right;font-family:monospace;}.tot{font-weight:700;}</style></head><body>
+  ${empresaPrintHeader('Mayor Auxiliar', label)}
+  <p style="font-size:11px;"><strong>${aux.nombre}</strong> · RUT: ${aux.rut} · ${aux.tipo==='cliente'?'Cliente':'Proveedor'}</p>
+  <table><thead><tr><th>N°</th><th>Fecha</th><th>Descripción</th><th>Cuenta</th><th>Débito</th><th>Crédito</th><th>Saldo</th></tr></thead><tbody>${rows}</tbody></table>
+  <p style="text-align:right;font-weight:700;margin-top:10px;">Saldo final: $ ${Math.abs(saldoAcum).toLocaleString('es-CL')}</p>
+  </body></html>`);
+  win.document.close(); setTimeout(()=>win.print(),400);
+}
+
+// ===== EXPORTAR MAYOR AUXILIAR EXCEL =====
+function exportarMayorAuxExcel() {
+  const auxId = parseInt(document.getElementById('filtro-aux-mayor-rut')?.value||'0');
+  if (!auxId) { alert('Selecciona un auxiliar primero'); return; }
+  const aux = auxiliares.find(a=>a.id===auxId);
+  const desde = document.getElementById('aux-mayor-desde')?.value||'';
+  const hasta = document.getElementById('aux-mayor-hasta')?.value||'';
+  let saldoAcum=0;
+  let xml=`<?xml version="1.0" encoding="UTF-8"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Styles><Style ss:ID="h"><Font ss:Bold="1" ss:Size="11"/></Style><Style ss:ID="t"><Font ss:Bold="1"/><Interior ss:Color="#F0F0F0" ss:Pattern="Solid"/></Style><Style ss:ID="n"><Alignment ss:Horizontal="Right"/><NumberFormat ss:Format="#,##0"/></Style></Styles><Worksheet ss:Name="Mayor Auxiliar"><Table>`;
+  xml+=`<Row><Cell ss:MergeAcross="6" ss:StyleID="h"><Data ss:Type="String">${empresa.nombre||''} — Mayor Auxiliar</Data></Cell></Row>`;
+  xml+=`<Row><Cell ss:MergeAcross="6"><Data ss:Type="String">${aux.nombre} · RUT: ${aux.rut}</Data></Cell></Row><Row/>`;
+  xml+=`<Row><Cell ss:StyleID="t"><Data ss:Type="String">N Asiento</Data></Cell><Cell ss:StyleID="t"><Data ss:Type="String">Fecha</Data></Cell><Cell ss:StyleID="t"><Data ss:Type="String">Descripcion</Data></Cell><Cell ss:StyleID="t"><Data ss:Type="String">Cuenta</Data></Cell><Cell ss:StyleID="t"><Data ss:Type="String">Debito</Data></Cell><Cell ss:StyleID="t"><Data ss:Type="String">Credito</Data></Cell><Cell ss:StyleID="t"><Data ss:Type="String">Saldo</Data></Cell></Row>`;
+  asientos.filter(a=>(!desde||a.fecha>=desde)&&(!hasta||a.fecha<=hasta)&&a.lineas.some(l=>l.auxiliarId===auxId))
+    .sort((a,b)=>a.fecha.localeCompare(b.fecha))
+    .forEach(asiento=>{
+      asiento.lineas.filter(l=>l.auxiliarId===auxId).forEach(l=>{
+        const cuenta=cuentas.find(c=>c.codigo===l.cuenta);
+        if(!cuenta)return;
+        const dif=cuenta.naturaleza==='Deudora'?(l.debito||0)-(l.credito||0):(l.credito||0)-(l.debito||0);
+        saldoAcum+=dif;
+        xml+=`<Row><Cell><Data ss:Type="String">#${String(asiento.id).padStart(4,'0')}</Data></Cell><Cell><Data ss:Type="String">${asiento.fecha}</Data></Cell><Cell><Data ss:Type="String">${asiento.glosa}</Data></Cell><Cell><Data ss:Type="String">${l.cuenta}</Data></Cell><Cell ss:StyleID="n"><Data ss:Type="Number">${l.debito||0}</Data></Cell><Cell ss:StyleID="n"><Data ss:Type="Number">${l.credito||0}</Data></Cell><Cell ss:StyleID="n"><Data ss:Type="Number">${saldoAcum}</Data></Cell></Row>`;
+      });
+    });
+  xml+=`</Table></Worksheet></Workbook>`;
+  const blob=new Blob([xml],{type:'application/vnd.ms-excel'});
+  const a2=document.createElement('a'); a2.href=URL.createObjectURL(blob);
+  a2.download=`MayorAux_${aux.rut.replace(/\./g,'').replace('-','_')}.xls`; a2.click();
+}
+
+// ===== EXPORTAR ANTIGÜEDAD PDF =====
+function exportarAntiguedadPDF() {
+  const fechaCorteStr = document.getElementById('antig-fecha-corte')?.value || new Date().toISOString().slice(0,10);
+  const filtroTipo = document.getElementById('filtro-antig-tipo')?.value||'';
+  const fechaCorte = new Date(fechaCorteStr+'T00:00:00');
+  const tipoLabel = {cliente:'Cliente',proveedor:'Proveedor',ambos:'Ambos'};
+  let rows='', totSaldo=0, tot0_30=0, tot31_60=0, tot61_90=0, totMas90=0;
+
+  auxiliares.filter(a=>!filtroTipo||a.tipo===filtroTipo||a.tipo==='ambos').forEach(aux=>{
+    const movsAux=[];
+    asientos.filter(a=>a.fecha<=fechaCorteStr).forEach(asiento=>{
+      asiento.lineas.filter(l=>l.auxiliarId===aux.id).forEach(l=>{
+        const cuenta=cuentas.find(c=>c.codigo===l.cuenta); if(!cuenta)return;
+        const dif=cuenta.naturaleza==='Deudora'?(l.debito||0)-(l.credito||0):(l.credito||0)-(l.debito||0);
+        if(dif!==0)movsAux.push({fecha:asiento.fecha,monto:dif});
+      });
+    });
+    if(!movsAux.length)return;
+    const saldo=movsAux.reduce((s,m)=>s+m.monto,0);
+    if(Math.abs(saldo)<1)return;
+    const ultimaFecha=movsAux[movsAux.length-1].fecha;
+    const dias=Math.floor((fechaCorte-new Date(ultimaFecha+'T00:00:00'))/(1000*60*60*24));
+    let v0_30=0,v31_60=0,v61_90=0,vMas90=0;
+    if(dias<=30)v0_30=saldo; else if(dias<=60)v31_60=saldo; else if(dias<=90)v61_90=saldo; else vMas90=saldo;
+    tot0_30+=v0_30;tot31_60+=v31_60;tot61_90+=v61_90;totMas90+=vMas90;totSaldo+=saldo;
+    const f=v=>v!==0?'$ '+Math.abs(v).toLocaleString('es-CL'):'';
+    rows+=`<tr><td>${tipoLabel[aux.tipo]||aux.tipo}</td><td>${aux.rut}</td><td>${aux.nombre}</td><td class="n">${f(v0_30)}</td><td class="n">${f(v31_60)}</td><td class="n">${f(v61_90)}</td><td class="n">${f(vMas90)}</td><td class="n tot">$ ${Math.abs(saldo).toLocaleString('es-CL')}</td><td>${ultimaFecha} (${dias}d)</td></tr>`;
+  });
+  const win=window.open('','_blank');
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Antiguedad</title><style>body{font-family:Arial,sans-serif;font-size:9px;margin:16px;}table{width:100%;border-collapse:collapse;}th,td{border:1px solid #ccc;padding:2px 5px;}th{background:#f0f0f0;font-weight:700;}td.n{text-align:right;font-family:monospace;}.tot{font-weight:700;}tr.tf td{background:#f5f5f5;font-weight:700;}</style></head><body>
+  ${empresaPrintHeader('Antigüedad de Saldos', 'Al '+fechaCorteStr)}
+  <table><thead><tr><th>Tipo</th><th>RUT</th><th>Nombre</th><th>0–30d</th><th>31–60d</th><th>61–90d</th><th>+90d</th><th>Total</th><th>Últ. Mov.</th></tr></thead><tbody>${rows}</tbody>
+  <tfoot><tr class="tf"><td colspan="3">TOTALES</td><td class="n">$ ${Math.abs(tot0_30).toLocaleString('es-CL')}</td><td class="n">$ ${Math.abs(tot31_60).toLocaleString('es-CL')}</td><td class="n">$ ${Math.abs(tot61_90).toLocaleString('es-CL')}</td><td class="n">$ ${Math.abs(totMas90).toLocaleString('es-CL')}</td><td class="n tot">$ ${Math.abs(totSaldo).toLocaleString('es-CL')}</td><td></td></tr></tfoot>
+  </table></body></html>`);
+  win.document.close(); setTimeout(()=>win.print(),400);
+}
+
+// ===== EXPORTAR ANTIGÜEDAD EXCEL =====
+function exportarAntiguedadExcel() {
+  const fechaCorteStr = document.getElementById('antig-fecha-corte')?.value || new Date().toISOString().slice(0,10);
+  const filtroTipo = document.getElementById('filtro-antig-tipo')?.value||'';
+  const fechaCorte = new Date(fechaCorteStr+'T00:00:00');
+  const tipoLabel = {cliente:'Cliente',proveedor:'Proveedor',ambos:'Ambos'};
+  let xml=`<?xml version="1.0" encoding="UTF-8"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Styles><Style ss:ID="h"><Font ss:Bold="1" ss:Size="11"/></Style><Style ss:ID="t"><Font ss:Bold="1"/><Interior ss:Color="#F0F0F0" ss:Pattern="Solid"/></Style><Style ss:ID="n"><Alignment ss:Horizontal="Right"/><NumberFormat ss:Format="#,##0"/></Style><Style ss:ID="f"><Font ss:Bold="1"/><Interior ss:Color="#F5F5F5" ss:Pattern="Solid"/><Alignment ss:Horizontal="Right"/><NumberFormat ss:Format="#,##0"/></Style></Styles><Worksheet ss:Name="Antiguedad Saldos"><Table>`;
+  xml+=`<Row><Cell ss:MergeAcross="8" ss:StyleID="h"><Data ss:Type="String">${empresa.nombre||''} — Antigüedad de Saldos al ${fechaCorteStr}</Data></Cell></Row><Row/>`;
+  xml+=`<Row><Cell ss:StyleID="t"><Data ss:Type="String">Tipo</Data></Cell><Cell ss:StyleID="t"><Data ss:Type="String">RUT</Data></Cell><Cell ss:StyleID="t"><Data ss:Type="String">Nombre</Data></Cell><Cell ss:StyleID="t"><Data ss:Type="String">0-30 dias</Data></Cell><Cell ss:StyleID="t"><Data ss:Type="String">31-60 dias</Data></Cell><Cell ss:StyleID="t"><Data ss:Type="String">61-90 dias</Data></Cell><Cell ss:StyleID="t"><Data ss:Type="String">+90 dias</Data></Cell><Cell ss:StyleID="t"><Data ss:Type="String">Total</Data></Cell><Cell ss:StyleID="t"><Data ss:Type="String">Ult. Movimiento</Data></Cell></Row>`;
+  let totSaldo=0,tot0_30=0,tot31_60=0,tot61_90=0,totMas90=0;
+  auxiliares.filter(a=>!filtroTipo||a.tipo===filtroTipo||a.tipo==='ambos').forEach(aux=>{
+    const movsAux=[];
+    asientos.filter(a=>a.fecha<=fechaCorteStr).forEach(asiento=>{
+      asiento.lineas.filter(l=>l.auxiliarId===aux.id).forEach(l=>{
+        const cuenta=cuentas.find(c=>c.codigo===l.cuenta);if(!cuenta)return;
+        const dif=cuenta.naturaleza==='Deudora'?(l.debito||0)-(l.credito||0):(l.credito||0)-(l.debito||0);
+        if(dif!==0)movsAux.push({fecha:asiento.fecha,monto:dif});
+      });
+    });
+    if(!movsAux.length)return;
+    const saldo=movsAux.reduce((s,m)=>s+m.monto,0);
+    if(Math.abs(saldo)<1)return;
+    const ultimaFecha=movsAux[movsAux.length-1].fecha;
+    const dias=Math.floor((fechaCorte-new Date(ultimaFecha+'T00:00:00'))/(1000*60*60*24));
+    let v0_30=0,v31_60=0,v61_90=0,vMas90=0;
+    if(dias<=30)v0_30=saldo;else if(dias<=60)v31_60=saldo;else if(dias<=90)v61_90=saldo;else vMas90=saldo;
+    tot0_30+=v0_30;tot31_60+=v31_60;tot61_90+=v61_90;totMas90+=vMas90;totSaldo+=saldo;
+    xml+=`<Row><Cell><Data ss:Type="String">${tipoLabel[aux.tipo]||aux.tipo}</Data></Cell><Cell><Data ss:Type="String">${aux.rut}</Data></Cell><Cell><Data ss:Type="String">${aux.nombre}</Data></Cell><Cell ss:StyleID="n"><Data ss:Type="Number">${v0_30}</Data></Cell><Cell ss:StyleID="n"><Data ss:Type="Number">${v31_60}</Data></Cell><Cell ss:StyleID="n"><Data ss:Type="Number">${v61_90}</Data></Cell><Cell ss:StyleID="n"><Data ss:Type="Number">${vMas90}</Data></Cell><Cell ss:StyleID="n"><Data ss:Type="Number">${saldo}</Data></Cell><Cell><Data ss:Type="String">${ultimaFecha} (${dias} dias)</Data></Cell></Row>`;
+  });
+  xml+=`<Row><Cell ss:MergeAcross="2" ss:StyleID="f"><Data ss:Type="String">TOTALES</Data></Cell><Cell ss:StyleID="f"><Data ss:Type="Number">${tot0_30}</Data></Cell><Cell ss:StyleID="f"><Data ss:Type="Number">${tot31_60}</Data></Cell><Cell ss:StyleID="f"><Data ss:Type="Number">${tot61_90}</Data></Cell><Cell ss:StyleID="f"><Data ss:Type="Number">${totMas90}</Data></Cell><Cell ss:StyleID="f"><Data ss:Type="Number">${totSaldo}</Data></Cell><Cell><Data ss:Type="String"></Data></Cell></Row>`;
+  xml+=`</Table></Worksheet></Workbook>`;
+  const blob=new Blob([xml],{type:'application/vnd.ms-excel'});
+  const a2=document.createElement('a');a2.href=URL.createObjectURL(blob);
+  a2.download=`Antiguedad_${fechaCorteStr}.xls`;a2.click();
 }
 
 </script>
