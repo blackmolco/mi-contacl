@@ -897,6 +897,18 @@
         <div class="form-group"><label>RUT <span style="color:var(--red)">*</span></label><input type="text" id="ne-rut" placeholder="76.123.456-7" maxlength="12" oninput="formatRutValida(this)">
         <div id="ne-rut-error" style="display:none;font-size:0.72rem;color:var(--red);margin-top:3px;">✗ RUT inválido</div></div>
         <div class="form-group"><label>Giro / Actividad <span style="color:var(--red)">*</span></label><input type="text" id="ne-giro" placeholder="Ej: Comercio al por menor"></div>
+        <div class="form-group">
+          <label>Régimen Tributario</label>
+          <select id="ne-regimen" style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:7px;color:var(--text);padding:8px 10px;font-size:0.83rem;">
+            <option value="">No especificado</option>
+            <option value="14A">14 A — Régimen General — IDPC 27%</option>
+            <option value="14D3">14 D N°3 — ProPyme General — IDPC 25%</option>
+            <option value="14D8">14 D N°8 — ProPyme Transparente</option>
+            <option value="14E">14 E — Renta Presunta</option>
+            <option value="micro">Microempresa Familiar</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Código Actividad Económica (SII)</label><input type="text" id="ne-acteco" placeholder="Ej: 4719"></div>
         <div class="form-group"><label>Dirección <span style="color:var(--red)">*</span></label><input type="text" id="ne-direccion" placeholder="Ej: Av. Providencia 1234"></div>
         <div class="form-group"><label>Ciudad <span style="color:var(--red)">*</span></label><input type="text" id="ne-ciudad" placeholder="Ej: Santiago"></div>
         <div class="form-group"><label>Región</label><input type="text" id="ne-region" placeholder="Ej: Región Metropolitana"></div>
@@ -1021,7 +1033,9 @@
     <div class="nav-section">Informes</div>
     <div class="nav-item" data-page="balance"><span class="nav-icon">⚖️</span> Balance</div>
     <div class="nav-item" data-page="balance8"><span class="nav-icon">📊</span> Balance 8 Col.</div>
+    <div class="nav-item" data-page="balance-ifrs"><span class="nav-icon">⚖️</span> Balance IFRS</div>
     <div class="nav-item" data-page="eer"><span class="nav-icon">📈</span> Estado Resultados</div>
+    <div class="nav-item" data-page="flujo-efectivo"><span class="nav-icon">💧</span> Flujo Efectivo</div>
     <div class="nav-item" data-page="iva"><span class="nav-icon">🧾</span> IVA / F29</div>
     <div class="nav-item" data-page="lcv"><span class="nav-icon">📖</span> Libro Compra/Venta</div>
     <div class="nav-section">Remuneraciones</div>
@@ -1034,8 +1048,6 @@
     <div class="nav-section">Tributario</div>
     <div class="nav-item" data-page="honorarios"><span class="nav-icon">🧾</span> Boletas Honorarios</div>
     <div class="nav-item" data-page="rut-memoria"><span class="nav-icon">🧠</span> Mapeo RUT→Cuenta</div>
-    <div class="nav-item" data-page="balance-ifrs"><span class="nav-icon">⚖️</span> Balance IFRS</div>
-    <div class="nav-item" data-page="flujo-efectivo"><span class="nav-icon">💧</span> Flujo Efectivo</div>
     <div class="nav-item" data-page="dj1887"><span class="nav-icon">📋</span> DJ 1887</div>
     <div class="nav-item" data-page="f22"><span class="nav-icon">📄</span> F22 Renta Anual</div>
     <div class="nav-item" data-page="ppm-config"><span class="nav-icon">💰</span> PPM / Tasa Dinámica</div>
@@ -5168,11 +5180,6 @@ function renderParamsRem() {
       ${pr('sc_trabajador_indef','Seg. Cesantía Trabajador Indefinido %','percent',P.sc_trabajador_indef)}
     </div>
     <div class="param-section">
-      <div class="param-title">🧾 F29 — IVA Mensual</div>
-      ${pr('f29_remanente_anterior','Remanente CF período anterior $','number',P.f29_remanente_anterior||0)}
-      <div style="font-size:0.73rem;color:var(--text3);margin-top:6px;">Ingresa el remanente de crédito fiscal arrastrado del mes anterior (si aplica).</div>
-    </div>
-    <div class="param-section">
       <div class="param-title">🧾 Honorarios (Ley 21.133)</div>
       ${pr('tasa_retencion_honorarios','Tasa Retención por Defecto %','number',P.tasa_retencion_honorarios||15.25)}
       <div style="font-size:0.73rem;color:var(--text3);margin-top:6px;line-height:1.4;">2023-2024: 13.75% · 2025-2026: 15.25% · 2027: 16% · 2028+: 17%<br>La tasa se auto-rellena al ingresar la fecha de la boleta.</div>
@@ -6123,14 +6130,17 @@ async function crearEmpresa() {
   if(lista.length>=10){toast('Máximo 10 empresas','warn');return;}
   const id='emp_'+Date.now();
   const nueva={id,nombre,rut:normalizeRut(rut),giro,direccion,ciudad,
-    region:document.getElementById('ne-region').value.trim(),
-    telefono:document.getElementById('ne-telefono').value.trim(),
-    email:document.getElementById('ne-email').value.trim(),
+    regimen:  document.getElementById('ne-regimen').value,
+    acteco:   document.getElementById('ne-acteco').value.trim(),
+    region:   document.getElementById('ne-region').value.trim(),
+    telefono: document.getElementById('ne-telefono').value.trim(),
+    email:    document.getElementById('ne-email').value.trim(),
     creadoPor: usuarioActual._uid,
     creadoPorEmail: usuarioActual.email};
   lista.push(nueva);
   await saveEmpresas(lista);
-  ['ne-nombre','ne-rut','ne-giro','ne-direccion','ne-ciudad','ne-region','ne-telefono','ne-email'].forEach(id2=>{const el=document.getElementById(id2);if(el)el.value='';});
+  ['ne-nombre','ne-rut','ne-giro','ne-acteco','ne-direccion','ne-ciudad','ne-region','ne-telefono','ne-email'].forEach(id2=>{const el=document.getElementById(id2);if(el)el.value='';});
+  const selReg=document.getElementById('ne-regimen');if(selReg)selReg.value='';;
   document.getElementById('form-nueva-empresa').style.display='none';
   await seleccionarEmpresa(id);
 }
@@ -9879,7 +9889,6 @@ function renderBalanceIFRS() {
   const cont = document.getElementById('balance-ifrs-contenido');
   if (!cont) return;
 
-  // Agrupar cuentas por sección IFRS
   const secciones = {
     ActivoCorriente: {}, ActivoNoCorriente: {},
     PasivoCorriente: {}, PasivoNoCorriente: {},
@@ -9887,36 +9896,42 @@ function renderBalanceIFRS() {
   };
 
   let totActC=0, totActNC=0, totPasC=0, totPasNC=0, totPat=0;
+  let totIng=0, totGas=0;
 
   cuentas.forEach(c => {
     const saldo = saldos[c.codigo] || 0;
+    // Acumular ingresos y gastos para resultado
+    if (c.tipo === 'Ingreso') { totIng += saldo; return; }
+    if (c.tipo === 'Gasto')   { totGas += saldo; return; }
     if (!saldo) return;
     const { seccion, grupo } = clasificarCuentaIFRS(c);
-    if (!secciones[seccion]) return; // skip Ingreso/Gasto/Otro
+    if (!secciones[seccion]) return;
     if (!secciones[seccion][grupo]) secciones[seccion][grupo] = [];
-    // Activo: saldo positivo = activo real; Pasivo/Pat: saldo negativo = saldo real (negativo de naturaleza acreedora)
+    // Activo naturaleza deudora: saldo positivo = valor real
+    // Pasivo/Pat naturaleza acreedora: saldo negativo = valor real → mostramos positivo
     const valor = (c.tipo === 'Activo') ? saldo : -saldo;
     if (Math.abs(valor) < 1) return;
     secciones[seccion][grupo].push({ cuenta: c, valor });
-    if (seccion==='ActivoCorriente')   totActC   += valor;
-    if (seccion==='ActivoNoCorriente') totActNC  += valor;
-    if (seccion==='PasivoCorriente')   totPasC   += valor;
-    if (seccion==='PasivoNoCorriente') totPasNC  += valor;
-    if (seccion==='Patrimonio')        totPat    += valor;
+    if (seccion==='ActivoCorriente')   totActC  += valor;
+    if (seccion==='ActivoNoCorriente') totActNC += valor;
+    if (seccion==='PasivoCorriente')   totPasC  += valor;
+    if (seccion==='PasivoNoCorriente') totPasNC += valor;
+    if (seccion==='Patrimonio')        totPat   += valor;
   });
 
-  // Resultado del ejercicio (ingresos - gastos)
-  let totIng=0, totGas=0;
-  cuentas.forEach(c => {
-    const s = saldos[c.codigo]||0;
-    if (c.tipo==='Ingreso') totIng += s;
-    if (c.tipo==='Gasto')   totGas += s;
-  });
-  const resultado = totIng - totGas;
-  totPat += resultado; // resultado integra el patrimonio
-  const totActivo  = totActC + totActNC;
-  const totPasivo  = totPasC + totPasNC;
+  // Resultado del ejercicio: ingresos tienen saldo negativo (naturaleza acreedora),
+  // gastos tienen saldo positivo (naturaleza deudora).
+  // Resultado = -totIng + totGas → pérdida si positivo, ganancia si negativo
+  // Para mostrar en patrimonio: utilidad = ingresos - gastos (ambos en valor real)
+  const ingReal = -totIng; // ingresos reales (positivo = ingresos)
+  const gasReal =  totGas; // gastos reales  (positivo = gastos)
+  const resultado = ingReal - gasReal; // positivo = utilidad
+  totPat += resultado;
+
+  const totActivo   = totActC + totActNC;
+  const totPasivo   = totPasC + totPasNC;
   const totalPasPat = totPasivo + totPat;
+  const balanceado  = Math.abs(totActivo - totalPasPat) < 10;
 
   const renderGrupos = (secData) =>
     Object.entries(secData).map(([grupo, items]) => {
@@ -9932,8 +9947,6 @@ function renderBalanceIFRS() {
       </div>`;
     }).join('');
 
-  const balanceado = Math.abs(totActivo - totalPasPat) < 10;
-
   cont.innerHTML = `
   ${empresaHeaderHTML('Balance Clasificado IFRS', label)}
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
@@ -9941,15 +9954,12 @@ function renderBalanceIFRS() {
     <!-- ACTIVOS -->
     <div>
       <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:var(--blue);margin-bottom:1rem;padding-bottom:6px;border-bottom:2px solid var(--blue);">ACTIVOS</div>
-
       <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.82rem;color:var(--text);margin-bottom:8px;">Activos Corrientes</div>
       ${renderGrupos(secciones.ActivoCorriente)}
       <div class="informe-row total" style="margin-top:4px;"><span>Total Activos Corrientes</span><span class="mono amount-pos">${fmt(totActC)}</span></div>
-
       <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.82rem;color:var(--text);margin:16px 0 8px;">Activos No Corrientes</div>
       ${renderGrupos(secciones.ActivoNoCorriente)}
       <div class="informe-row total"><span>Total Activos No Corrientes</span><span class="mono amount-pos">${fmt(totActNC)}</span></div>
-
       <div class="informe-row total" style="margin-top:12px;background:rgba(59,130,246,.1);padding:10px;border-radius:8px;">
         <span style="font-weight:800;font-size:0.95rem;">TOTAL ACTIVOS</span>
         <span class="mono" style="color:var(--blue);font-size:1rem;font-weight:800;">${fmt(totActivo)}</span>
@@ -9959,37 +9969,35 @@ function renderBalanceIFRS() {
     <!-- PASIVOS + PATRIMONIO -->
     <div>
       <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:var(--red);margin-bottom:1rem;padding-bottom:6px;border-bottom:2px solid var(--red);">PASIVOS Y PATRIMONIO</div>
-
       <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.82rem;color:var(--text);margin-bottom:8px;">Pasivos Corrientes</div>
       ${renderGrupos(secciones.PasivoCorriente)}
       <div class="informe-row total"><span>Total Pasivos Corrientes</span><span class="mono amount-neg">${fmt(totPasC)}</span></div>
-
       <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.82rem;color:var(--text);margin:16px 0 8px;">Pasivos No Corrientes</div>
       ${renderGrupos(secciones.PasivoNoCorriente)}
       <div class="informe-row total"><span>Total Pasivos No Corrientes</span><span class="mono amount-neg">${fmt(totPasNC)}</span></div>
-
       <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.82rem;color:var(--text);margin:16px 0 8px;">Patrimonio Neto</div>
       ${renderGrupos(secciones.Patrimonio)}
-      ${resultado!==0?`<div class="informe-row" style="padding:3px 0 3px 10px;"><span style="font-size:0.8rem;color:var(--text2);">Resultado del Ejercicio</span><span class="mono" style="font-size:0.82rem;color:${resultado>=0?'var(--green)':'var(--red)'};">${resultado>=0?'':'-'}${fmt(Math.abs(resultado))}</span></div>`:''}
+      ${resultado!==0?`<div class="informe-row" style="padding:3px 0 3px 10px;">
+        <span style="font-size:0.8rem;color:var(--text2);">Resultado del Ejercicio</span>
+        <span class="mono" style="font-size:0.82rem;color:${resultado>=0?'var(--green)':'var(--red)'};">${resultado>=0?'':'-'}${fmt(Math.abs(resultado))}</span>
+      </div>`:''}
       <div class="informe-row total"><span>Total Patrimonio Neto</span><span class="mono" style="color:var(--green);">${fmt(totPat)}</span></div>
-
       <div class="informe-row total" style="margin-top:12px;background:rgba(220,53,69,.07);padding:10px;border-radius:8px;">
         <span style="font-weight:800;font-size:0.95rem;">TOTAL PASIVOS + PATRIMONIO</span>
         <span class="mono" style="color:var(--red);font-size:1rem;font-weight:800;">${fmt(totalPasPat)}</span>
       </div>
-
       <div style="margin-top:10px;text-align:center;">
         <span style="font-size:0.78rem;font-weight:700;color:${balanceado?'var(--green)':'var(--red)'};">
-          ${balanceado?'✅ Balance cuadrado (Activo = Pasivo + Patrimonio)':'⚠️ Balance descuadrado — diferencia: '+fmt(Math.abs(totActivo-totalPasPat))}
+          ${balanceado?'✅ Balance cuadrado':'⚠️ Descuadrado — diferencia: '+fmt(Math.abs(totActivo-totalPasPat))}
         </span>
       </div>
     </div>
   </div>
   <div class="alert alert-info" style="margin-top:1.5rem;font-size:0.78rem;">
     ℹ️ Clasificación basada en NIC 1 / IFRS. Activos corrientes = realizables en menos de 12 meses.
-    La clasificación automática se basa en el código de cuenta (1-01/1-02 = corriente, 1-03 = no corriente).
-    Para mayor precisión, puedes crear subcuentas específicas.
+    Clasificación automática por código: 1-01/1-02 = corriente · 1-03/1-04 = no corriente.
   </div>`;
+}
 }
 
 function exportarBalanceIFRSPDF() {
